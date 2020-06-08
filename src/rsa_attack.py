@@ -40,35 +40,35 @@ def low_public_exponent_attack(c, e):
     m, res = gmpy2.iroot(e, c)
     return int(m), res
 
-def to_contfracs(a, b):
-    contfracs = []
+def to_contfrac(a, b):
+    contfrac = []
     while b:
-        contfracs.append(a // b)
+        contfrac.append(a // b)
         a, b = b, a % b
-    return contfracs
+    return contfrac
 
-def contfracs_to_rational(contfracs):
-    if len(contfracs) == 0:
+def contfrac_to_rational(contfrac):
+    if len(contfrac) == 0:
         return 1, 0
-    elif len(contfracs) == 1:
-        return contfracs[0], 1
-    elif len(contfracs) == 2:
-        return contfracs[0] * contfracs[1] + 1, contfracs[1]
+    elif len(contfrac) == 1:
+        return contfrac[0], 1
+    elif len(contfrac) == 2:
+        return contfrac[0] * contfrac[1] + 1, contfrac[1]
 
-    n0, d0 = contfracs[0], 1
-    n1, d1 = n0 * contfracs[1] + 1, contfracs[1]
-    for q in contfracs[2:]:
+    n0, d0 = contfrac[0], 1
+    n1, d1 = n0 * contfrac[1] + 1, contfrac[1]
+    for q in contfrac[2:]:
         n0, n1 = n1, n1 * q + n0
         d0, d1 = d1, d1 * q + d0
     return n1, d1
 
-def convergent_from_contfrac(contfracs):
+def convergent_from_contfrac(contfrac):
     convergents = []
-    for i in range(len(contfracs)):
-        contfrac = contfracs[:i+1]
+    for i in range(len(contfrac)):
+        c = contfrac[:i+1]
         if i % 2 == 0:
-            contfrac[-1] += 1
-        convergents.append(contfracs_to_rational(contfrac))
+            c[-1] += 1
+        convergents.append(contfrac_to_rational(c))
     return convergents
 
 def wieners_attack(e, n):
@@ -84,8 +84,13 @@ def wieners_attack(e, n):
     Examples:
         >>> wieners_attack(2621, 8927)
         5
+
+    Refs:
+        - https://github.com/orisano/owiener
+        - https://github.com/pablocelayes/rsa-wiener-attack
+        - http://www.reverse-engineering.info/Cryptography/ShortSecretExponents.pdf
     """
-    convergents = convergent_from_contfrac(to_contfracs(e, n))
+    convergents = convergent_from_contfrac(to_contfrac(e, n))
     for k, dg in convergents:
         edg = e * dg
         phi = edg // k
