@@ -115,7 +115,6 @@ def long2bytes(l, endian="big"):
     """
     b = b''
     while l:
-        print(l & 0xff)
         b = (l & 0xff).to_bytes(1, "big") + b
         l >>= 8
     return b
