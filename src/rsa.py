@@ -1,40 +1,72 @@
-from .number import exgcd, inverse_mod, lcm
-import gmpy2
-import secrets
-import math
-import random
+from cryptolib.number import *
 
-def common_modulus_attack(n, e1, e2, c1, c2):
-    """Common Modulus Attack
+def rsa_calc_privatekey(p, q, e):
+    """Calc private key
 
-    execute common modulus attack
+    calculate RSA private key
 
     Args:
-        n  (int): RSA n
-        e1 (int): RSA e1
-        e2 (int): RSA e2
-        c1 (int): RSA c1
-        c2 (int): RSA c2
+        p (long): prime 1
+        q (long): prime 2
+        e (long): public key e
 
     Returns:
-        long: RSA plain text
+        long: private key
     """
-    _, s1, s2 =  exgcd(e1, e2)
-    v = pow(c1, s1, n)
-    w = pow(c2, s2, n)
-    m = (v * w) % n
-    return m
+    L = lcm(p - 1, q - 1)
+    d = inverse_mod(e, L)
+    return d
 
-def low_public_exponent_attack(c, e):
-    """Low Public Exponent Attack
+def rsa_keygen(k):
+    """RSA keygen
+
+    generate RSA key
 
     Args:
-        c (int): RSA encrypted value
-        e (int): RSA public exponent
+        k (int): security paramator
 
     Returns:
-        int: RSA plain text
-        bool: is success 
+        long: public key n
+        long: public key e
+        long: private key d
     """
-    m, res = gmpy2.iroot(e, c)
-    return int(m), res
+    p = get_prime(k // 2)
+    q = get_prime(k // 2)
+
+    while not is_coprime(p, q):
+        q = get_prime(k // 2)
+
+    n = p * q
+    e = 65537
+    d = rsa_calc_privatekey(p, q, e)
+    return n, e, d
+
+def rsa_encrypt(m, n, e):
+    """RSA encrypt
+
+    encrypt plaintext
+
+    Args:
+        m (long): plaintext
+        n (long): public key n
+        e (long): public key e
+
+    Returns:
+        long: ciphertext
+    """
+    return pow(m, e, n)
+
+def rsa_decrypt(c, n, d):
+    """RSA decrypt
+
+    decrypt ciphertext
+
+    Args:
+        c (long): ciphertext
+        n (long): public key n
+        d (long): private key d
+
+    Returns:
+        long: plaintext
+    """
+    return pow(c, d, n)
