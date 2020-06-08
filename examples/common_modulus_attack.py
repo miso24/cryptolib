@@ -1,6 +1,6 @@
-from cryptolib.number import *
-from cryptolib.encoding import *
-from cryptolib.rsa import *
+from cryptolib.number import get_prime
+from cryptolib.encoding import long2bytes, bytes2long
+from cryptolib.rsa_attack import common_modulus_attack
 
 p = get_prime(512)
 q = get_prime(512)
@@ -8,7 +8,6 @@ q = get_prime(512)
 n = p * q
 e1 = 65537
 e2 = 39317
-#d1 = inverse_mod(e1, lcm(p - 1, q - 1))
 
 m = bytes2long(b'crypto{c0mmon_mo9u1us_a7t5ck}')
 c1 = pow(m, e1, n)
