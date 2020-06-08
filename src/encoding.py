@@ -1,5 +1,5 @@
 import codecs
-from Crypto.Util.number import *
+import base64
 import math
 
 def xor(s, n):
@@ -14,7 +14,7 @@ def xor(s, n):
     Returns:
         str: xor encoded data
     """
-    return ''.join([ord(c) ^ n for c in s])
+    return ''.join([chr(ord(c) ^ n) for c in s])
 
 def xor_b(b, n):
     """XOR
@@ -28,7 +28,7 @@ def xor_b(b, n):
     Returns:
         bytes: xor encoded data
     """
-    return b''.join([ord(c) ^ n for c in b])
+    return bytes([ord(c) ^ n for c in b])
 
 def rot13(data):
     return codecs.decode(data, encoding="rot13")
@@ -44,7 +44,7 @@ def b64dec(data):
     Returns:
         bytes: decoded data
     """
-    return codecs.decode(data, encoding="base64")
+    return base64.b64decode(data)
 
 def b64enc(data):
     """Base64 encode
@@ -57,7 +57,7 @@ def b64enc(data):
     Returns:
         bytes: encoded data
     """
-    return codecs.encode(data, encoding="base64")
+    return base64.b64encode(data)
 
 def hex2bytes(h):
     """Hex to Bytes
