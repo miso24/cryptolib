@@ -1,4 +1,5 @@
 import codecs
+from Crypto.Util.number import *
 import math
 
 def xor(s, n):
@@ -112,8 +113,12 @@ def long2bytes(l, endian="big"):
     Returns:
         bytes: converted long
     """
-    length = round(math.log2(l) / 8)
-    return l.to_bytes(length, endian)
+    b = b''
+    while l:
+        print(l & 0xff)
+        b = (l & 0xff).to_bytes(1, "big") + b
+        l >>= 8
+    return b
 
 def bytes2long(b, endian="big"):
     """Bytes to Long
@@ -126,4 +131,9 @@ def bytes2long(b, endian="big"):
     Returns:
         long: converted bytes
     """
-    return int.from_bytes(b, endian)
+    l = 0
+    for byte in b:
+        l += byte
+        l <<= 8
+    l >>= 8
+    return l
