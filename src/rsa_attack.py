@@ -62,7 +62,7 @@ def contfrac_to_rational(contfrac):
         d0, d1 = d1, d1 * q + d0
     return n1, d1
 
-def convergent_from_contfrac(contfrac):
+def convergents_from_contfrac(contfrac):
     convergents = []
     for i in range(len(contfrac)):
         c = contfrac[:i+1]
@@ -90,7 +90,7 @@ def wieners_attack(e, n):
         - https://github.com/pablocelayes/rsa-wiener-attack
         - http://www.reverse-engineering.info/Cryptography/ShortSecretExponents.pdf
     """
-    convergents = convergent_from_contfrac(to_contfrac(e, n))
+    convergents = convergents_from_contfrac(to_contfrac(e, n))
     for k, dg in convergents:
         edg = e * dg
         phi = edg // k
