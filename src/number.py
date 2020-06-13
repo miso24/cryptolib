@@ -81,20 +81,22 @@ def miller_rabin(n, k=20):
     if n & 1 == 0 or n == 0: return False
 
     mpz_n = gmpy2.mpz(n)
-    r, d = 0, mpz_n
+    r, d = 0, mpz_n - 1
     while d & 1 != 0:
         d >>= 1
         r += 1
 
     for _ in range(k):
-        a = gmpy2.mpz(random.randint(2, mpz_n - 2))
+        a = gmpy2.mpz(random.randint(1, mpz_n - 1))
         x = gmpy2.powmod(a, d, mpz_n)
         if x == 1 or x == mpz_n - 1:
             continue
         for _ in range(r):
             x = gmpy2.powmod(x, 2, mpz_n)
-            if x != mpz_n - 1:
-                return False
+            if x == mpz_n - 1:
+                break
+        else:
+            return False
     return True
 
 def get_randint(n):
@@ -138,6 +140,22 @@ def get_prime(n):
     p = secrets.randbits(n)
     while not is_prime(p):
         p = secrets.randbits(n)
+    return p
+
+def next_prime(n):
+    """
+        
+    get next prime number
+
+    Args:
+        n (int): start
+
+    Returns:
+        int: first prime number greater than n
+    """
+    p = n + 1
+    while not is_prime(p):
+        p += 1
     return p
 
 def is_coprime(a, b):
