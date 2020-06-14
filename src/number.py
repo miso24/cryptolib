@@ -1,3 +1,4 @@
+from functools import reduce
 import random
 import math
 import secrets
@@ -98,6 +99,31 @@ def miller_rabin(n, k=20):
         else:
             return False
     return True
+
+def crt(nl, al):
+    """
+
+    Chinise Reminder Theorem
+
+    Args:
+        nl (List[int]): modulos
+        al (List[int]): a
+
+    Returns:
+        int
+
+    References:
+        - http://elliptic-shiho.hatenablog.com/entry/2016/04/03/020117
+        - https://qiita.com/drken/items/ae02240cd1f8edfc86fd
+    """
+    N = reduce(lambda x, y: x * y, nl, 1)
+    rslt = 0
+    for n, a in zip(nl, al):
+        m = N // n
+        _, x, _ = exgcd(m, n)
+        rslt += x * m * a
+        rslt %= N
+    return rslt
 
 def get_randint(n):
     """
