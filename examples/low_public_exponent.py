@@ -14,4 +14,14 @@ d = inverse_mod(e, L)
 m = bytes2long(b'crypto{weak_rsa_hahaha}')
 c = pow(m, e, n)
 
-print(long2bytes(low_public_exponent_attack(e, c)))
+print(f"n = {n}")
+print(f"e = {e}")
+print(f"c = {c}")
+
+m_guess, rslt = low_public_exponent_attack(e, c)
+
+if rslt:
+    print("-" * 30)
+    print(long2bytes(m_guess))
+else:
+    print('Failed!')
