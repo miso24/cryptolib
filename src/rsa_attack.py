@@ -100,3 +100,24 @@ def wieners_attack(e, n):
         if x % 2 == 0 and gmpy2.is_square(pow(x // 2, 2) - n):
             return dg // (edg % k)
     return None
+
+def hasteds_broadcast_attack(e, ni, ci):
+    """
+
+    Hasted's broadcast attack
+
+    Args:
+        e (int): public exponent 
+        ni (List[long]): public keys
+        ci (List[long]): ciphers
+
+    Returns:
+        long: plaintext
+
+    Refs:
+        - http://elliptic-shiho.hatenablog.com/entry/2015/11/12/182219
+        - http://inaz2.hatenablog.com/entry/2016/01/15/011138
+    """
+    m_e = crt(ni, ci)
+    m, rslt = gmpy2.iroot(m_e, e)
+    return int(m), rslt

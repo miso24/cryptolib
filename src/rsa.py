@@ -1,3 +1,7 @@
+import math
+import random
+import gmpy2
+
 from cryptolib.number import *
 
 def rsa_calc_privatekey(p, q, e):
@@ -40,6 +44,39 @@ def rsa_keygen(k):
     e = 65537
     d = rsa_calc_privatekey(p, q, e)
     return n, e, d
+
+def rsa_primes_from_privatekey(e, d, n, t=100):
+    """
+    
+    calculate primes from private key
+
+    Args:
+        e (long): public exponent
+        d (long): private key
+        n (long): public key
+        t (int): num of challenges
+
+    Returns:
+        long: prime p
+        long: prime q
+
+    Refs:
+        - http://elliptic-shiho.hatenablog.com/entry/2015/12/14/043745
+    """
+    k = d * e - 1
+    for _ in range(t):
+        g = random.randint(2, n - 1)
+        t = k
+        while True:
+            x = pow(g, t, n)
+            t //= 2
+            if x > 1 and math.gcd(x - 1, n) > 1:
+                p = math.gcd(x - 1, n)
+                q = n // p
+                return p, q
+            if t == 0:
+                break
+    return -1, -1
 
 def rsa_encrypt(m, n, e):
     """RSA encrypt
