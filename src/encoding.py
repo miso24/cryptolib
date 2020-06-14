@@ -33,10 +33,62 @@ def xor_b(b, n):
 def rot13(data):
     return codecs.decode(data, encoding="rot13")
 
-def b64dec(data):
-    """Base64 decode
+def b16dec(data):
+    """
 
-    decode encoded data
+    Base16 decode
+
+    Args:
+        data (bytes) 
+
+    Returns:
+        bytes: decoded data
+    """
+    return base64.b16decode(data)
+
+def b16enc(data):
+    """
+
+    Base16 encode
+
+    Args:
+        data (bytes)
+
+    Returns:
+        bytes: encoded data
+    """
+    return base64.b16encode(data)
+
+def b32dec(data):
+    """
+
+    Base32 decode
+
+    Args:
+        data (bytes) 
+
+    Returns:
+        bytes: decoded data
+    """
+    return base64.b32decode(data)
+
+def b32enc(data):
+    """
+
+    Base32 encode
+
+    Args:
+        data (bytes)
+
+    Returns:
+        bytes: encoded data
+    """
+    return base64.b32encode(data)
+
+def b64dec(data):
+    """
+
+    Base64 decode
 
     Args:
         data (bytes) 
@@ -47,9 +99,9 @@ def b64dec(data):
     return base64.b64decode(data)
 
 def b64enc(data):
-    """Base64 encode
+    """
 
-    encode data
+    Base64 encode
 
     Args:
         data (bytes)
@@ -58,6 +110,34 @@ def b64enc(data):
         bytes: encoded data
     """
     return base64.b64encode(data)
+
+
+def b85dec(data):
+    """
+
+    Base85 decode
+
+    Args:
+        data (bytes) 
+
+    Returns:
+        bytes: decoded data
+    """
+    return base64.b85decode(data)
+
+def b85enc(data):
+    """
+
+    Base85 encode
+
+    Args:
+        data (bytes)
+
+    Returns:
+        bytes: encoded data
+    """
+
+    return base64.b85encode(data)
 
 def hex2bytes(h):
     """Hex to Bytes
@@ -102,7 +182,7 @@ def hex2long(h):
         h = "0x" + h
     return int(h, 16)
 
-def long2bytes(l, endian="big"):
+def long2bytes(l):
     """Long to Bytes
 
     convert long to bytes
@@ -113,13 +193,13 @@ def long2bytes(l, endian="big"):
     Returns:
         bytes: converted long
     """
-    b = b''
+    b = []
     while l:
-        b = (l & 0xff).to_bytes(1, "big") + b
+        b.insert(0, l & 0xff)
         l >>= 8
-    return b
+    return bytes(b)
 
-def bytes2long(b, endian="big"):
+def bytes2long(b):
     """Bytes to Long
 
     convert bytes to long
