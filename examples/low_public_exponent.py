@@ -18,7 +18,7 @@ print(f"n = {n}")
 print(f"e = {e}")
 print(f"c = {c}")
 
-m_guess, rslt = low_public_exponent_attack(e, c)
+m_guess, rslt = low_public_exponent_attack(c, e)
 
 if rslt:
     print("-" * 30)
