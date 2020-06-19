@@ -1,2 +1,2 @@
-__all__ = ['rsa', 'rsa_attack', 'encoding', 'number']
+__all__ = ['rsa', 'encoding', 'number']
 __version__ = '0.1.0'

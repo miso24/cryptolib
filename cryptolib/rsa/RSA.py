@@ -4,7 +4,7 @@ import gmpy2
 
 from cryptolib.number import *
 
-def rsa_calc_privatekey(p, q, e):
+def calc_privatekey(p, q, e):
     """Calc private key
 
     calculate RSA private key
@@ -21,7 +21,7 @@ def rsa_calc_privatekey(p, q, e):
     d = inverse_mod(e, L)
     return d
 
-def rsa_keygen(k):
+def keygen(k):
     """RSA keygen
 
     generate RSA key
@@ -42,10 +42,10 @@ def rsa_keygen(k):
 
     n = p * q
     e = 65537
-    d = rsa_calc_privatekey(p, q, e)
+    d = calc_privatekey(p, q, e)
     return n, e, d
 
-def rsa_primes_from_privatekey(e, d, n, t=100):
+def primes_from_privatekey(e, d, n, t=100):
     """
     
     calculate primes from private key
@@ -78,7 +78,7 @@ def rsa_primes_from_privatekey(e, d, n, t=100):
                 break
     return -1, -1
 
-def rsa_encrypt(m, n, e):
+def encrypt(m, n, e):
     """RSA encrypt
 
     encrypt plaintext
@@ -93,7 +93,7 @@ def rsa_encrypt(m, n, e):
     """
     return pow(m, e, n)
 
-def rsa_decrypt(c, n, d):
+def decrypt(c, n, d):
     """RSA decrypt
 
     decrypt ciphertext
