@@ -1,7 +1,7 @@
 from cryptolib.number import *
-from cryptolib.encoding import *
-from cryptolib.rsa import *
-from cryptolib.rsa_attack import hasteds_broadcast_attack
+from cryptolib.encoding.bytes import *
+from cryptolib.rsa import RSA
+from cryptolib.rsa.attack import *
 
 m = bytes2long(b'crypto{h4s73ds_br0adc45t_a7t4ck}')
 e = 17
@@ -12,7 +12,7 @@ for i in range(e):
     p = get_prime(512)
     q = get_prime(512)
     n = p * q
-    c = rsa_encrypt(m, n, e)
+    c = RSA.encrypt(m, n, e)
     nl.append(n)
     cl.append(c)
 

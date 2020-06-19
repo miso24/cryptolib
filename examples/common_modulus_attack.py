@@ -1,6 +1,6 @@
 from cryptolib.number import get_prime
-from cryptolib.encoding import long2bytes, bytes2long
-from cryptolib.rsa_attack import common_modulus_attack
+from cryptolib.encoding.bytes import long2bytes, bytes2long
+from cryptolib.rsa.attack import common_modulus_attack
 
 p = get_prime(512)
 q = get_prime(512)
