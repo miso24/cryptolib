@@ -1,1 +1,1 @@
-__all__ = ['basex', 'binenc', 'xor']
+__all__ = ['basex', 'bytes', 'xor']
