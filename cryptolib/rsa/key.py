@@ -23,6 +23,8 @@ class RSAPublicKeyStruct(univ.Sequence):
         namedtype.NamedType('publicExponent', univ.Integer()),
     )
 
+enc_formats = ['der', 'pem']
+
 class RSAPublicKey:
     """
 
@@ -37,32 +39,37 @@ class RSAPublicKey:
         self.n = 0
         self.e = 0
 
-    def import_key(self, pem_data):
+    def import_key(self, data, enc_format="pem"):
         """
 
         import RSA public key data
 
         Args:
-            pem_data (str): PEM format public key
+            data (Union[str, bytes]): data of public key
+            enc_format (str): encoding format of public key
 
         """
-        data = pem.decode(pem_data, pem.RSA_PUBLIC)
+        if enc_format not in enc_formats:
+            raise ValueError("Invalid encoding format")
+        if enc_format == "pem":
+            data = pem.decode(data, pem.RSA_PUBLIC)
         decoded, _ = decoder.decode(data, asn1Spec=RSAPublicKeyStruct())
         self.n = decoded['modulus']
         self.e = decoded['publicExponent']
 
-    def import_key_from_file(self, filename):
+    def import_key_from_file(self, filename, enc_format="pem"):
         """
 
         import RSA public key data from file
 
         Args:
             filename (str): file name of RSA public key
+            enc_format (str): encoding format of public key
 
         """
         with open(filename) as f:
-            pem_data = f.read()
-        self.import_key(pem_data)
+            data = f.read()
+        self.import_key(data, enc_format=enc_format)
 
     def export_key(self, enc_format="pem"):
         """
@@ -109,16 +116,20 @@ class RSAPrivateKey:
         self.q = 0
         self.d = 0
 
-    def import_key(self, pem_data):
+    def import_key(self, data, enc_format="pem"):
         """
 
         import RSA public key data
 
         Args:
-            pem_data (str): PEM format public key
+            data (Union[str, bytes]): data of public key
+            enc_format (str): encoding format of public key
 
         """
-        data = pem.decode(pem_data, pem.RSA_PRIVATE)
+        if enc_format not in enc_formats:
+            raise ValueError("Invalid encoding format")
+        if enc_format == "pem":
+            data = pem.decode(data, pem.RSA_PUBLIC)
         decoded, _ = decoder.decode(data, asn1Spec=RSAPrivateKeyStruct())
         self.n = decoded['modulus']
         self.e = decoded['publicExponent']
@@ -126,18 +137,19 @@ class RSAPrivateKey:
         self.p = decoded['prime1']
         self.q = decoded['prime2']
 
-    def import_key_from_file(self, filename):
+    def import_key_from_file(self, filename, enc_format="pem"):
         """
 
         import RSA public key data from file
 
         Args:
             filename (str): file name of RSA public key
+            enc_format (str): encoding format of public key
 
         """
         with open(filename) as f:
-            pem_data = f.read()
-        self.import_key(pem_data) 
+            data = f.read()
+        self.import_key(data, enc_format=enc_format) 
 
     def export_key(self, enc_format="pem"):
         """
