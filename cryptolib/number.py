@@ -179,10 +179,15 @@ def next_prime(n):
     Returns:
         int: first prime number greater than n
     """
-    p = n + 1
-    while not is_prime(p):
-        p += 1
-    return p
+    if n <= 1:
+        return 2
+    if n % 2 == 0:
+        n += 1
+    else:
+        n += 2
+    while not is_prime(n):
+        n += 2
+    return n
 
 def is_coprime(a, b):
     return math.gcd(a, b) == 1
