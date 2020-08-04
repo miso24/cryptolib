@@ -54,7 +54,7 @@ def inverse_mod(u, v):
     Returns:
         int: x
     """
-    g, x, _ = exgcd(u, v)
+    g, x, _ = exgcd(u % v, v)
     if g != 1:
         raise Exception('mod inverse is not exist!')
     return x % v
@@ -168,6 +168,8 @@ def get_prime(n):
         p = secrets.randbits(n)
     return p
 
+next_prime_cache = {}
+
 def next_prime(n):
     """
         
@@ -179,18 +181,26 @@ def next_prime(n):
     Returns:
         int: first prime number greater than n
     """
-    if n <= 1:
-        return 2
-    if n % 2 == 0:
-        n += 1
-    else:
-        n += 2
-    while not is_prime(n):
-        n += 2
-    return n
+    if n not in next_prime_cache:
+        next_prime_cache[n] = gmpy2.next_prime(n)
+    return next_prime_cache[n]
+
+def logn(x, n):
+    """
+    
+    Base n logarithm of x 
+
+    Args:
+        x (int): antilogarithm
+        n (int): base
+
+    Returns:
+        float
+    """
+    return gmpy2.log(x) / gmpy2.log(n)
 
 def is_coprime(a, b):
-    return math.gcd(a, b) == 1
+    return gmpy2.gcd(a, b) == 1
 
 def is_prime(n):
     return miller_rabin(n)
