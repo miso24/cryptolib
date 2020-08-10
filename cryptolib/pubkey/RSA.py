@@ -9,6 +9,7 @@ from cryptolib.encoding import pem
 from cryptolib.encoding.bytes import *
 from cryptolib.number import *
 
+
 def rsa_calc_privatekey(p, q, e):
     """Calc private key
 
@@ -192,8 +193,54 @@ class RSA:
             raise ValueError('private exponent is not exist')
         return pow(c, self.d, self.n)
 
+    def export_key(self, enc_format="pem"):
+        """
+
+        Export RSA key
+
+        Args:
+            enc_format (str)
+
+        Returns:
+            Union[bytes, str]: encoded key
+        """
+        if self.d:
+            marker = pem.RSA_PRIVATE
+            data = self._der_encoded_privkey()
+        else:
+            marker = pem.RSA_PUBLIC
+            data = self._der_encoded_pubkey()
+
+        if enc_format == "der":
+            return data
+        elif enc_format == "pem":
+            return pem.encode(data, marker)
+        else:
+            raise ValueError('format is not found')
+
+    def _der_encoded_privkey(self):
+        key_struct = RSAPrivateKeyStruct()
+        key_struct['version'] = 0
+        key_struct['modulus'] = self.n
+        key_struct['publicExponent'] = self.e
+        key_struct['privateExponent'] = self.d
+        key_struct['prime1'] = self.n
+        key_struct['prime2'] = self.n
+        key_struct['exponent1'] = self.d % (self.p - 1)
+        key_struct['exponent2'] = self.d % (self.q - 1)
+        key_struct['coefficient'] = inverse_mod(self.p, self.q)
+        encoded = encoder.encode(key_struct)
+        return encoded
+
+    def _der_encoded_pubkey(self):
+        key_struct = RSAPublicKeyStruct()
+        key_struct['modulus'] = self.n
+        key_struct['publicExponent'] = self.e
+        encoded = encoder.encode(key_struct)
+        return encoded
+
     @classmethod
-    def generate(cls, k):
+    def generate(cls, k, e=65537):
         """
 
         generate RSA key
@@ -211,12 +258,25 @@ class RSA:
             q = get_prime(k // 2)
 
         n = p * q
-        e = 65537
         d = rsa_calc_privatekey(p, q, e)
         return cls(n, e, p, q, d)
 
     @classmethod
     def construct(cls, n, e, p=None, q=None, d=None):
+        """
+
+        Construct
+
+        Args:
+            n (int): modulus
+            e (int): public exponent
+            p (int, optional): prime 1
+            q (int, optional): prime 2
+            d (int, optional): private exponent
+
+        Returns:
+            RSA: RSA object
+        """
         if not n or not e:
             raise ValueError('n or e needed!')
 
@@ -229,6 +289,16 @@ class RSA:
 
     @classmethod
     def import_key_der(cls, data):
+        """
+
+        Import RSA key (der)
+
+        Args:
+            data (bytes): key data
+
+        Returns:
+            RSA: RSA object
+        """
         key_structs = {
             "public": RSAPublicKeyStruct(),
             "private": RSAPrivateKeyStruct()
@@ -256,6 +326,16 @@ class RSA:
 
     @classmethod
     def import_key_pem(cls, data):
+        """
+
+        Import RSA key (pem)
+
+        Args:
+            data (str): key data
+
+        Returns:
+            RSA: RSA object
+        """
         pem_decoded = pem.decode(data)
         if pem_decoded.get(pem.RSA_PRIVATE):
             return cls.import_key_der(pem_decoded[pem.RSA_PRIVATE][0])
