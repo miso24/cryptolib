@@ -1,7 +1,6 @@
 import copy
 import gmpy2
 import random
-import sieve
 from cryptolib.number import *
 
 class ECMPoint:
