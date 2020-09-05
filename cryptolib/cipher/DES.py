@@ -1,5 +1,3 @@
-from cryptolib.encoding.bytes import bytes2long, long2bytes
-
 IP = [
     58, 50, 42, 34, 26, 18, 10,  2,
     60, 52, 44, 36, 28, 20, 12,  4,
@@ -117,6 +115,11 @@ SBOX = [
     ]
 ]
 
+SHIFT_TABLE = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1]
+
+DES_ENC = 0
+DES_DEC = 1
+
 def permute(table, size, x):
     rslt = 0
     for d in table:
@@ -134,15 +137,21 @@ def shift_right(x, size):
 def subkey_gen(key):
     subkeys = []
     reduce_key = permute(PC1, 64, key)
-    Ci, Di = (reduce_key & 0xfffffff0000000) >> 28, reduce_key & 0xfffffff
+    Ci, Di = split(reduce_key, 28)
     for i in range(16):
-        shift_size = 1 if i in [0, 1, 8, 15] else 2
-        Ci, Di = shift_left(Ci, shift_size), shift_left(Di, shift_size)
-        subkey = permute(PC2, 56, Ci << 28 | Di)
+        Ci, Di = map(lambda x: shift_left(x, SHIFT_TABLE[i]), [Ci, Di])
+        subkey = permute(PC2, 56, merge(Ci, Di, 28))
         subkeys.append(subkey)
     return subkeys
 
-def round(x, sub_key):
+def split(x, size):
+    mask = pow(2, size) - 1
+    return (x & (mask << size)) >> size, x & mask
+
+def merge(a, b, size):
+    return a << size | b
+
+def round_f(x, sub_key):
     _x = permute(E, 32, x)
     _x ^= sub_key
     y = 0
@@ -157,15 +166,24 @@ def round(x, sub_key):
     y >>= 4
     return permute(P, 32, y)
 
-def encrypt(plain, key):
+def crypt(plain, key, process):
     plain = permute(IP, 64, plain)
-    L, R = (plain & 0xffffffff00000000) >> 32, plain & 0xffffffff
+    L, R = split(plain, 32)
     sub_keys = subkey_gen(key)
     for i in range(16):
-        y = round(R, sub_keys[i])
+        if process == DES_ENC:
+            y = round_f(R, sub_keys[i])
+        elif process == DES_DEC:
+            y = round_f(R, sub_keys[15 - i])
         if i != 15:
             L, R = R, L ^ y
         else:
             L = L ^ y
-    result = permute(INV_IP, 64, L << 32 | R)
+    result = permute(INV_IP, 64, merge(L, R, 32))
     return result
+
+def encrypt(plain, key):
+    return crypt(plain, key, DES_ENC)
+
+def decrypt(plain, key):
+    return crypt(plain, key, DES_DEC)
