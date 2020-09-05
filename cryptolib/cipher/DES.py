@@ -128,10 +128,10 @@ def permute(table, size, x):
 def shift_left(x, size):
     return ((x << size) | (x >> (28 - size))) & 0xfffffff
 
-def shift_left(x, size):
-    return ((x >> size) | (x << (28 - size))) & 0xfffffff
+def shift_right(x, size):
+    return (x >> size) | (x << (28 - size) & 0xfffffff)
 
-def enc_subkey_gen(key):
+def subkey_gen(key):
     subkeys = []
     reduce_key = permute(PC1, 64, key)
     Ci, Di = (reduce_key & 0xfffffff0000000) >> 28, reduce_key & 0xfffffff
@@ -141,9 +141,6 @@ def enc_subkey_gen(key):
         subkey = permute(PC2, 56, Ci << 28 | Di)
         subkeys.append(subkey)
     return subkeys
-
-def dec_subkey_gen(key):
-    subkeys = []
 
 def round(x, sub_key):
     _x = permute(E, 32, x)
@@ -163,7 +160,7 @@ def round(x, sub_key):
 def encrypt(plain, key):
     plain = permute(IP, 64, plain)
     L, R = (plain & 0xffffffff00000000) >> 32, plain & 0xffffffff
-    sub_keys = enc_subkey_gen(key)
+    sub_keys = subkey_gen(key)
     for i in range(16):
         y = round(R, sub_keys[i])
         if i != 15:
