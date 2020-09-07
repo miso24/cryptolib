@@ -219,6 +219,44 @@ def legendre_symbol(a, p):
     ls = pow(a, (p - 1) // 2, p)
     return -1 if ls == p - 1 else ls
 
+def toneill_shanks(a, p):
+    Q, S = p - 1, 0
+    while Q % 2 == 0:
+        S += 1
+        Q >>= 1
+
+    z = 2
+    while legendre_symbol(z, p) != -1:
+        z += 1
+
+    M, R = S, pow(a, (Q + 1) // 2, p)
+    c, t = pow(z, Q, p), pow(a, Q, p)
+    while True:
+        if t == 0:
+            return 0
+        elif t == 1:
+            return R
+        t_ = pow(t, 2, p)
+        for i in range(1, M):
+            if t_ == 1:
+                break
+            t_ = pow(t_, 2, p)
+        b = pow(c, pow(2, M - i - 1), p)
+        M = i
+        c = pow(b, 2, p)
+        t = (t * pow(b, 2, p)) % p
+        R = (R * b) % p
+
+def mod_sqrt(a, p):
+    if legendre_symbol(a, p) != 1:
+        return 0
+    elif a == 0:
+        return 0
+    elif p % 4 == 3:
+        return pow(a, (p + 1) // 4, p)
+
+    return toneill_shanks(a, p)
+    
 def is_coprime(a, b):
     return gmpy2.gcd(a, b) == 1
 
