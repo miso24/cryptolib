@@ -199,6 +199,26 @@ def logn(x, n):
     """
     return gmpy2.log(x) / gmpy2.log(n)
 
+def legendre_symbol(a, p):
+    """
+
+    Legendre symbol
+
+    a ^ (p - 1) / 2 (mod p)
+    =  1 a is quadratic residue 
+      -1 a is non-quadratic residue
+       0 a ≡ 0 (mod p)
+
+    Args:
+        a (int)
+        p (int)
+
+    Returns:
+        int
+    """
+    ls = pow(a, (p - 1) // 2, p)
+    return -1 if ls == p - 1 else ls
+
 def is_coprime(a, b):
     return gmpy2.gcd(a, b) == 1
 
