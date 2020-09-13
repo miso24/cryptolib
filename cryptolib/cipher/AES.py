@@ -49,7 +49,6 @@ class ByteMatrix:
         return cls(b''.join(words), size)
 
 
-
 # GF(2) polynomial
 GF_MODULO = 0b100011011
 
@@ -129,17 +128,6 @@ INV_SBOX = [
     0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d,
 ]
 
-def split_key(key, kw):
-    return [key[i:i+kw] for i in range(0, len(key), kw)]
-
-def split_key_bit(key, kw):
-    mask = (2 << (8 * kw - 1)) - 1
-    rslt = []
-    for _ in range(4):
-        rslt.append(key & mask)
-        key >>= kw * 8
-    return rslt
-
 def xor_bytes(a, b):
     return bytearray([x ^ y for x, y in zip(a, b)])
 
@@ -190,29 +178,38 @@ def inv_mix_columns(st):
         st[j,2] = poly_mul(13, col[0]) ^ poly_mul( 9, col[1]) ^ poly_mul(14, col[2]) ^ poly_mul(11, col[3])
         st[j,3] = poly_mul(11, col[0]) ^ poly_mul(13, col[1]) ^ poly_mul( 9, col[2]) ^ poly_mul(14, col[3])
 
-def subkey_gen(key, kw):
-    ws = split_key(key, kw)
-    subkeys = [ByteMatrix.from_words(ws)]
-    for i in range(10):
+def subkey_gen(key):
+    kw = len(key) // 4
+    if len(key) == 16:
+        nr = 10
+    elif len(key) == 24:
+        nr = 8
+    elif len(key) == 32:
+        nr = 7
+    ws = [key[i:i+4] for i in range(0, len(key), 4)]
+    for i in range(nr):
         w = ws[-1]
         _, r = poly_divmod(pow(2, i), GF_MODULO)
-        rcon = bytearray([r, 0, 0, 0])
+        rcon = bytearray([r] + [0] * (kw - 1))
         temp = xor_bytes(sub_word(rot_word(w)), rcon)
-        nw = [None] * 4
-        for j in range(4):
-            nw[j] = xor_bytes(ws[j], temp)
+        nw = [None] * kw
+        for j in range(kw):
+            if kw == 8 and j == 4:
+                temp = sub_word(temp)
+            nw[j] = xor_bytes(ws[i*kw+j], temp)
             temp = nw[j]
-        sk = ByteMatrix.from_words(nw)
-        subkeys.append(sk)
-        ws = nw
+        ws.extend(nw)
+    if kw != 4:
+        ws = ws[:-(kw-4)]
+    subkeys = [ByteMatrix.from_words(ws[i:i+4]) for i in range(0, len(ws), 4)]
     return subkeys
 
-def encrypt(plain, key):
-    subkeys = subkey_gen(key, 4)
+def _encrypt(plain, key, Nr):
+    subkeys = subkey_gen(key)
     s = ByteMatrix(plain)
     add_round_key(s, subkeys[0])
 
-    for i in range(1, 10):
+    for i in range(1, Nr):
         sub_bytes(s)
         shift_rows(s)
         mix_columns(s)
@@ -223,11 +220,11 @@ def encrypt(plain, key):
     add_round_key(s, subkeys[-1])
     return s.bytes()
 
-def decrypt(plain, key):
-    subkeys = [*reversed(subkey_gen(key, 4))]
+def _decrypt(plain, key, Nr):
+    subkeys = [*reversed(subkey_gen(key))]
     s = ByteMatrix(plain)
 
-    for i in range(10):
+    for i in range(Nr):
         add_round_key(s, subkeys[i])
         if i:
             inv_mix_columns(s)
@@ -236,3 +233,27 @@ def decrypt(plain, key):
 
     add_round_key(s, subkeys[-1])
     return s.bytes()
+
+def encrypt(plain, key):
+    key_length = len(key)
+    if key_length == 16:
+        Nr = 10
+    elif key_length == 24:
+        Nr = 12
+    elif key_length == 32:
+        Nr = 14
+    else:
+        raise ValueError('invalid key length')
+    return _encrypt(plain, key, Nr)
+
+def decrypt(plain, key):
+    key_length = len(key)
+    if key_length == 16:
+        Nr = 10
+    elif key_length == 24:
+        Nr = 12
+    elif key_length == 32:
+        Nr = 14
+    else:
+        raise ValueError('invalid key length')
+    return _decrypt(plain, key, Nr)
