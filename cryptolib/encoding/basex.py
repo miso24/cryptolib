@@ -1,4 +1,4 @@
-from cryptolib.encoding.bytes import long2bytes, bytes2long
+from cryptolib.encoding import bytes2long
 import struct
 import base64
 
@@ -12,12 +12,13 @@ def b16dec(data):
     Base16 decode
 
     Args:
-        data (bytes) 
+        data (bytes)
 
     Returns:
         bytes: decoded data
     """
     return base64.b16decode(data)
+
 
 def b16enc(data):
     """
@@ -32,18 +33,20 @@ def b16enc(data):
     """
     return base64.b16encode(data)
 
+
 def b32dec(data):
     """
 
     Base32 decode
 
     Args:
-        data (bytes) 
+        data (bytes)
 
     Returns:
         bytes: decoded data
     """
     return base64.b32decode(data)
+
 
 def b32enc(data):
     """
@@ -57,6 +60,7 @@ def b32enc(data):
         bytes: encoded data
     """
     return base64.b32encode(data)
+
 
 def b58enc(data):
     """
@@ -72,13 +76,14 @@ def b58enc(data):
     if isinstance(data, str):
         data = data.encode()
 
-    l = bytes2long(data)
+    long = bytes2long(data)
     rslt = b''
 
-    while l:
-        rslt = struct.pack('<B', _b58table[l % 58]) + rslt
-        l //= 58
+    while long:
+        rslt = struct.pack('<B', _b58table[long % 58]) + rslt
+        long //= 58
     return rslt
+
 
 def b58dec(data):
     """
@@ -96,15 +101,16 @@ def b58dec(data):
         data = data.encode()
 
     rslt = b''
-    l = 0
+    long = 0
 
     for byte in data:
-        l = l * 58 + _b58table.index(byte)
+        long = long * 58 + _b58table.index(byte)
 
-    while l:
-        rslt = struct.pack('<B', l % 256) + rslt
-        l >>= 8
+    while long:
+        rslt = struct.pack('<B', long % 256) + rslt
+        long >>= 8
     return rslt
+
 
 def b64dec(data):
     """
@@ -112,12 +118,13 @@ def b64dec(data):
     Base64 decode
 
     Args:
-        data (bytes) 
+        data (bytes)
 
     Returns:
         bytes: decoded data
     """
     return base64.b64decode(data)
+
 
 def b64enc(data):
     """
@@ -139,12 +146,13 @@ def b85dec(data):
     Base85 decode
 
     Args:
-        data (bytes) 
+        data (bytes)
 
     Returns:
         bytes: decoded data
     """
     return base64.b85decode(data)
+
 
 def b85enc(data):
     """

@@ -5,9 +5,10 @@ import secrets
 
 import gmpy2
 
+
 def lcm(a, b):
     """LCM
-    
+
     calculate lcm
 
     Args:
@@ -18,6 +19,7 @@ def lcm(a, b):
         int: LCM of a and b
     """
     return a * b // math.gcd(a, b)
+
 
 def exgcd(a, b):
     """Euclid
@@ -41,6 +43,7 @@ def exgcd(a, b):
         y0, y1 = y1, y0 - y1 * q
     return b, x0, y0
 
+
 def inverse_mod(u, v):
     """Inverse Mod
 
@@ -48,8 +51,8 @@ def inverse_mod(u, v):
     calculate x
 
     Args:
-        u (int) 
-        v (int) 
+        u (int)
+        v (int)
 
     Returns:
         int: x
@@ -78,8 +81,10 @@ def miller_rabin(n, k=20):
         >>> miller_rabin(629685412367973552)
         False
     """
-    if n == 2: return True
-    if n & 1 == 0 or n == 0: return False
+    if n == 2:
+        return True
+    if n & 1 == 0 or n == 0:
+        return False
 
     mpz_n = gmpy2.mpz(n)
     r, d = 0, mpz_n - 1
@@ -99,6 +104,7 @@ def miller_rabin(n, k=20):
         else:
             return False
     return True
+
 
 def crt(nl, al):
     """
@@ -125,6 +131,7 @@ def crt(nl, al):
         rslt %= N
     return rslt
 
+
 def get_randint(n):
     """
 
@@ -139,6 +146,7 @@ def get_randint(n):
     """
     return random.randint(0, n)
 
+
 def get_randbits(n):
     """
 
@@ -151,6 +159,7 @@ def get_randbits(n):
         int: n bits random number
     """
     return secrets.randbits(n)
+
 
 def get_prime(n):
     """
@@ -168,11 +177,13 @@ def get_prime(n):
         p = secrets.randbits(n)
     return p
 
+
 next_prime_cache = {}
+
 
 def next_prime(n):
     """
-        
+
     get next prime number
 
     Args:
@@ -185,10 +196,11 @@ def next_prime(n):
         next_prime_cache[n] = gmpy2.next_prime(n)
     return next_prime_cache[n]
 
+
 def logn(x, n):
     """
-    
-    Base n logarithm of x 
+
+    Base n logarithm of x
 
     Args:
         x (int): antilogarithm
@@ -199,13 +211,14 @@ def logn(x, n):
     """
     return gmpy2.log(x) / gmpy2.log(n)
 
+
 def legendre_symbol(a, p):
     """
 
     Legendre symbol
 
     a ^ (p - 1) / 2 (mod p)
-    =  1 a is quadratic residue 
+    =  1 a is quadratic residue
       -1 a is non-quadratic residue
        0 a ≡ 0 (mod p)
 
@@ -218,6 +231,7 @@ def legendre_symbol(a, p):
     """
     ls = pow(a, (p - 1) // 2, p)
     return -1 if ls == p - 1 else ls
+
 
 def toneill_shanks(a, p):
     Q, S = p - 1, 0
@@ -247,6 +261,7 @@ def toneill_shanks(a, p):
         t = (t * pow(b, 2, p)) % p
         R = (R * b) % p
 
+
 def mod_sqrt(a, p):
     if legendre_symbol(a, p) != 1:
         return 0
@@ -256,9 +271,11 @@ def mod_sqrt(a, p):
         return pow(a, (p + 1) // 4, p)
 
     return toneill_shanks(a, p)
-    
+
+
 def is_coprime(a, b):
     return gmpy2.gcd(a, b) == 1
+
 
 def is_prime(n):
     return miller_rabin(n)

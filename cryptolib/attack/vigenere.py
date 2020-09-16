@@ -18,8 +18,10 @@ english_freq = {
     'y': 0.019940, 'z': 0.000770,
 }
 
+
 def reduce_gcd(l):
     return functools.reduce(math.gcd, l)
+
 
 def n_gram(n, text):
     rslt = []
@@ -28,6 +30,7 @@ def n_gram(n, text):
             text[i:i+n]
         )
     return rslt
+
 
 def calc_freq_dist(counter, c_length):
     dist = 0
@@ -38,6 +41,7 @@ def calc_freq_dist(counter, c_length):
         else:
             dist += english_freq[key] ** 2
     return dist
+
 
 def freq_analysis(c, key_length):
     guess_key = ""
@@ -55,6 +59,7 @@ def freq_analysis(c, key_length):
         avg_freq_dist += lower_freq_dist
         guess_key += idx2lower(freq_dists.index(lower_freq_dist))
     return guess_key, avg_freq_dist/key_length
+
 
 def kasisky_test(c, n_max=10):
     c = re.sub(r'(\s|[^a-zA-Z])', '', c)
@@ -85,6 +90,7 @@ def kasisky_test(c, n_max=10):
     if len(candidates) == 0:
         raise ValueError('Kasisky test faild')
     return candidates
+
 
 def break_cipher(c):
     """

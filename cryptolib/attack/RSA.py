@@ -1,9 +1,7 @@
-import secrets
-import math
-import random
 import gmpy2
 
-from cryptolib.number import *
+from cryptolib.number import exgcd, crt
+
 
 def common_modulus_attack(n, e1, e2, c1, c2):
     """Common Modulus Attack
@@ -20,11 +18,12 @@ def common_modulus_attack(n, e1, e2, c1, c2):
     Returns:
         long: RSA plain text
     """
-    _, s1, s2 =  exgcd(e1, e2)
+    _, s1, s2 = exgcd(e1, e2)
     v = pow(c1, s1, n)
     w = pow(c2, s2, n)
     m = (v * w) % n
     return m
+
 
 def low_public_exponent_attack(c, e):
     """Low Public Exponent Attack
@@ -35,10 +34,11 @@ def low_public_exponent_attack(c, e):
 
     Returns:
         int: RSA plain text
-        bool: is success 
+        bool: is success
     """
     m, res = gmpy2.iroot(c, e)
     return int(m), res
+
 
 def to_contfrac(a, b):
     contfrac = []
@@ -46,6 +46,7 @@ def to_contfrac(a, b):
         contfrac.append(a // b)
         a, b = b, a % b
     return contfrac
+
 
 def contfrac_to_rational(contfrac):
     if len(contfrac) == 0:
@@ -62,6 +63,7 @@ def contfrac_to_rational(contfrac):
         d0, d1 = d1, d1 * q + d0
     return n1, d1
 
+
 def convergents_from_contfrac(contfrac):
     convergents = []
     for i in range(len(contfrac)):
@@ -70,6 +72,7 @@ def convergents_from_contfrac(contfrac):
             c[-1] += 1
         convergents.append(contfrac_to_rational(c))
     return convergents
+
 
 def wieners_attack(e, n):
     """Wiener's Attack
@@ -101,13 +104,14 @@ def wieners_attack(e, n):
             return dg // (edg % k)
     return None
 
+
 def hasteds_broadcast_attack(e, ni, ci):
     """
 
     Hasted's broadcast attack
 
     Args:
-        e (int): public exponent 
+        e (int): public exponent
         ni (List[long]): public keys
         ci (List[long]): ciphers
 

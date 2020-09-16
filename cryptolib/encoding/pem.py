@@ -45,11 +45,12 @@ def encode(data, label):
     """
     encoded_data = b64enc(data).decode()
     wrapped_data = textwrap.fill(encoded_data, width=64)
-    
+
     pem_data = f"-----BEGIN {label}-----\n"
     pem_data += wrapped_data + "\n"
     pem_data += f"-----END {label}-----"
     return pem_data
+
 
 def decode(pem_data):
     """
@@ -63,7 +64,8 @@ def decode(pem_data):
         Dictionary[bytes]: PEM decoded data
     """
     rslt = {}
-    pattern = re.compile(r"-----BEGIN (?P<marker>[A-Z\s]+)-----\n(.+?)\n-----END (?P=marker)-----\n?", re.DOTALL)
+    pattern = re.compile(
+        r"-----BEGIN (?P<marker>[A-Z\s]+)-----\n(.+?)\n-----END (?P=marker)-----\n?", re.DOTALL)
     for pem in pattern.finditer(pem_data):
         marker, data = pem.groups()
         decoded_data = b64dec(''.join(data.split('\n')))

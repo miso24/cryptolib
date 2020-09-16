@@ -1,11 +1,13 @@
 import gmpy2
 import functools
 import random
-from cryptolib.number import *
+from cryptolib.number import logn, next_prime
+
 
 # pollard rho f(x)
 def pr_fx(x, c, n):
     return gmpy2.t_mod(x ** 2 - c, n)
+
 
 def pollard_rho(n, f_c=1):
     """
@@ -31,6 +33,7 @@ def pollard_rho(n, f_c=1):
         return pollard_rho(n, f_c=f_c)
     else:
         return int(d)
+
 
 def pollard_rho_brent(n, f_c=1):
     """
@@ -72,6 +75,7 @@ def pollard_rho_brent(n, f_c=1):
         return None
     else:
         return int(g)
+
 
 def pollard_pm1(n, B=2**8, max_try=10):
     """

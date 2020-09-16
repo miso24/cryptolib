@@ -1,5 +1,5 @@
 import gmpy2
-from cryptolib.number import *
+
 
 def fermat_factor(n):
     """

@@ -12,7 +12,7 @@ class ByteMatrix:
             for i in range(size):
                 row.append(data[i*size+j])
             self.matrix.append(row)
-    
+
     def pprint(self):
         for j in range(self.size):
             for i in range(self.size):
@@ -29,7 +29,7 @@ class ByteMatrix:
 
     def __setitem__(self, key, value):
         if isinstance(key, tuple) and len(key) == 2:
-            row, col = key 
+            row, col = key
             if isinstance(col, slice):
                 for idx, r in enumerate(self.matrix[col]):
                     r[row] = value[idx]
@@ -52,6 +52,7 @@ class ByteMatrix:
 # GF(2) polynomial
 GF_MODULO = 0b100011011
 
+
 def poly_divmod(a, b):
     if b == 1:
         return a, 0
@@ -63,6 +64,7 @@ def poly_divmod(a, b):
         al = a.bit_length()
     return quoitent, a
 
+
 def poly_mul(a, b):
     product = 0
     while a and b:
@@ -71,6 +73,7 @@ def poly_mul(a, b):
         a = (a << 1) ^ (0x11b if a & 0x80 else 0x00)
         b >>= 1
     return product
+
 
 def poly_exgcd(a, b):
     x0, y0, x1, y1 = 0, 1, 1, 0
@@ -83,10 +86,12 @@ def poly_exgcd(a, b):
         y0, y1 = y1, y0 ^ poly_mul(y1, q)
     return x1, y1, b
 
+
 @lru_cache
 def poly_inverse(x):
     inv, _, _ = poly_exgcd(x, GF_MODULO)
     return inv
+
 
 # AES S-box
 SBOX = [
@@ -128,55 +133,70 @@ INV_SBOX = [
     0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d,
 ]
 
+
 def xor_bytes(a, b):
     return bytearray([x ^ y for x, y in zip(a, b)])
+
 
 def sub_word(b_array):
     return bytearray([SBOX[(b >> 4) * 16 + (b & 0xf)] for b in b_array])
 
+
 def rot_word(b):
     return b[1:] + b[:1]
+
 
 def add_round_key(st, key):
     for j in range(4):
         for i in range(4):
-            st[i,j] = st[i,j] ^ key[i,j]
+            st[i, j] = st[i, j] ^ key[i, j]
+
 
 def mix_columns(st):
     for j in range(4):
-        col = st[j,:]
-        st[j,0] = poly_mul(2, col[0]) ^ poly_mul(3, col[1]) ^ col[2] ^ col[3]
-        st[j,1] = col[0] ^ poly_mul(2, col[1]) ^ poly_mul(3, col[2]) ^ col[3]
-        st[j,2] = col[0] ^ col[1] ^ poly_mul(2, col[2]) ^ poly_mul(3, col[3])
-        st[j,3] = poly_mul(3, col[0]) ^ col[1] ^ col[2] ^ poly_mul(2, col[3])
+        col = st[j, :]
+        st[j, 0] = poly_mul(2, col[0]) ^ poly_mul(3, col[1]) ^ col[2] ^ col[3]
+        st[j, 1] = col[0] ^ poly_mul(2, col[1]) ^ poly_mul(3, col[2]) ^ col[3]
+        st[j, 2] = col[0] ^ col[1] ^ poly_mul(2, col[2]) ^ poly_mul(3, col[3])
+        st[j, 3] = poly_mul(3, col[0]) ^ col[1] ^ col[2] ^ poly_mul(2, col[3])
+
 
 def shift_rows(st):
     for i in range(4):
         st[:, i] = st[i:, i] + st[:i, i]
 
+
 def sub_bytes(st):
     for j in range(4):
         for i in range(4):
             val = st[i, j]
-            st[i,j] = SBOX[(val >> 4) * 16 + (val & 0xf)]
+            st[i, j] = SBOX[(val >> 4) * 16 + (val & 0xf)]
+
 
 def inv_sub_bytes(st):
     for j in range(4):
         for i in range(4):
             val = st[i, j]
-            st[i,j] = INV_SBOX[(val >> 4) * 16 + (val & 0xf)]
+            st[i, j] = INV_SBOX[(val >> 4) * 16 + (val & 0xf)]
+
 
 def inv_shift_rows(st):
     for i in range(4):
         st[:, i] = st[-i:, i] + st[:-i, i]
 
+
 def inv_mix_columns(st):
     for j in range(4):
-        col = st[j,:]
-        st[j,0] = poly_mul(14, col[0]) ^ poly_mul(11, col[1]) ^ poly_mul(13, col[2]) ^ poly_mul( 9, col[3])
-        st[j,1] = poly_mul( 9, col[0]) ^ poly_mul(14, col[1]) ^ poly_mul(11, col[2]) ^ poly_mul(13, col[3])
-        st[j,2] = poly_mul(13, col[0]) ^ poly_mul( 9, col[1]) ^ poly_mul(14, col[2]) ^ poly_mul(11, col[3])
-        st[j,3] = poly_mul(11, col[0]) ^ poly_mul(13, col[1]) ^ poly_mul( 9, col[2]) ^ poly_mul(14, col[3])
+        col = st[j, :]
+        st[j, 0] = poly_mul(14, col[0]) ^ poly_mul(
+            11, col[1]) ^ poly_mul(13, col[2]) ^ poly_mul(9, col[3])
+        st[j, 1] = poly_mul(9, col[0]) ^ poly_mul(
+            14, col[1]) ^ poly_mul(11, col[2]) ^ poly_mul(13, col[3])
+        st[j, 2] = poly_mul(13, col[0]) ^ poly_mul(
+            9, col[1]) ^ poly_mul(14, col[2]) ^ poly_mul(11, col[3])
+        st[j, 3] = poly_mul(11, col[0]) ^ poly_mul(
+            13, col[1]) ^ poly_mul(9, col[2]) ^ poly_mul(14, col[3])
+
 
 def subkey_gen(key):
     kw = len(key) // 4
@@ -204,6 +224,7 @@ def subkey_gen(key):
     subkeys = [ByteMatrix.from_words(ws[i:i+4]) for i in range(0, len(ws), 4)]
     return subkeys
 
+
 def _encrypt(plain, key, Nr):
     subkeys = subkey_gen(key)
     s = ByteMatrix(plain)
@@ -220,6 +241,7 @@ def _encrypt(plain, key, Nr):
     add_round_key(s, subkeys[-1])
     return s.bytes()
 
+
 def _decrypt(plain, key, Nr):
     subkeys = [*reversed(subkey_gen(key))]
     s = ByteMatrix(plain)
@@ -234,6 +256,7 @@ def _decrypt(plain, key, Nr):
     add_round_key(s, subkeys[-1])
     return s.bytes()
 
+
 def encrypt(plain, key):
     key_length = len(key)
     if key_length == 16:
@@ -245,6 +268,7 @@ def encrypt(plain, key):
     else:
         raise ValueError('invalid key length')
     return _encrypt(plain, key, Nr)
+
 
 def decrypt(plain, key):
     key_length = len(key)

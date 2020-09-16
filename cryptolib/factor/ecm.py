@@ -1,7 +1,8 @@
 import copy
 import gmpy2
 import random
-from cryptolib.number import *
+from cryptolib.number import logn, is_coprime, next_prime
+
 
 class ECMPoint:
     a = 0
@@ -42,6 +43,7 @@ def ecm_calc_factor(p1, p2, N):
         deno = (p1.y * 2) % N
     return gmpy2.gcd(deno, N)
 
+
 def ecm(N):
     """
 
@@ -55,7 +57,7 @@ def ecm(N):
     """
     L = int(gmpy2.log2(N) ** 2 + gmpy2.log2(N) * 0.25)
     iter_count = 0
-   
+
     while True:
         a = gmpy2.mpz(random.randint(0, N))
         x = gmpy2.mpz(random.randint(0, N))

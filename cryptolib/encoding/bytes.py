@@ -1,6 +1,6 @@
 def hex2bytes(h):
     """Hex to Bytes
-   
+
     convert hex to bytes
 
     Args:
@@ -19,9 +19,10 @@ def hex2bytes(h):
         h = h[2:]
     return bytes.fromhex(h)
 
+
 def hex2long(h):
     """Hex to Long
-   
+
     convert hex to long
 
     Args:
@@ -41,22 +42,24 @@ def hex2long(h):
         h = "0x" + h
     return int(h, 16)
 
-def long2bytes(l):
+
+def long2bytes(long):
     """Long to Bytes
 
     convert long to bytes
 
     Args:
-        l (long)
+        long (int)
 
     Returns:
         bytes: converted long
     """
     b = []
-    while l:
-        b.insert(0, l & 0xff)
-        l >>= 8
+    while long:
+        b.insert(0, long & 0xff)
+        long >>= 8
     return bytes(b)
+
 
 def bytes2long(b):
     """Bytes to Long
@@ -69,9 +72,9 @@ def bytes2long(b):
     Returns:
         long: converted bytes
     """
-    l = 0
+    long = 0
     for byte in b:
-        l += byte
-        l <<= 8
-    l >>= 8
-    return l
+        long += byte
+        long <<= 8
+    long >>= 8
+    return long

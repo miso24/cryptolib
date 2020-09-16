@@ -6,11 +6,12 @@ def xor(s, n):
     Args:
         s (str): string
         n (int): xor val
-    
+
     Returns:
         str: xor encoded data
     """
     return ''.join([chr(ord(c) ^ n) for c in s])
+
 
 def xor_b(b, n):
     """XOR
@@ -20,7 +21,7 @@ def xor_b(b, n):
     Args:
         b (bytes): string
         n (int): xor val
-    
+
     Returns:
         bytes: xor encoded data
     """

@@ -1,6 +1,4 @@
-import string
-
-from cryptolib.util.ascii import *
+from cryptolib.util.ascii import upper2idx, lower2idx, idx2upper, idx2lower
 
 
 def vigenere_encrypt(plain, key):
@@ -16,6 +14,7 @@ def vigenere_encrypt(plain, key):
         elif c.islower():
             rslt += idx2lower((lower2idx(c) + k) % 26)
     return rslt
+
 
 def vigenere_decrypt(cipher, key):
     rslt = ""

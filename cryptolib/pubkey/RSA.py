@@ -1,13 +1,18 @@
 from pyasn1.type import namedtype
 from pyasn1.type import univ
 from pyasn1.codec.der import decoder, encoder
+from pyasn1.error import PyAsn1Error
 import math
 import random
-import gmpy2
 
 from cryptolib.encoding import pem
-from cryptolib.encoding.bytes import *
-from cryptolib.number import *
+from cryptolib.encoding.bytes import bytes2long
+from cryptolib.number import (
+    lcm,
+    inverse_mod,
+    get_prime,
+    is_coprime
+)
 
 
 def rsa_calc_privatekey(p, q, e):
@@ -26,6 +31,7 @@ def rsa_calc_privatekey(p, q, e):
     L = lcm(p - 1, q - 1)
     d = inverse_mod(e, L)
     return d
+
 
 def rsa_encrypt(m, e, n):
     """RSA encrypt
@@ -46,6 +52,7 @@ def rsa_encrypt(m, e, n):
         m = bytes2long(m.encode())
 
     return pow(m, e, n)
+
 
 def rsa_decrypt(c, d, n):
     """RSA decrypt
@@ -84,12 +91,13 @@ def rsa_keygen(k):
 
     n = p * q
     e = 65537
-    d = calc_privatekey(p, q, e)
+    d = rsa_calc_privatekey(p, q, e)
     return n, e, d
+
 
 def rsa_primes_from_privatekey(e, d, n, t=100):
     """
-    
+
     calculate primes from private key
 
     Args:
@@ -253,7 +261,7 @@ class RSA:
         """
         p = get_prime(k // 2)
         q = get_prime(k // 2)
-        
+
         while not is_coprime(p, q):
             q = get_prime(k // 2)
 
@@ -281,7 +289,7 @@ class RSA:
             raise ValueError('n or e needed!')
 
         if d:
-            p, q = rsa_primes_from_privatekey(e, d, n) 
+            p, q = rsa_primes_from_privatekey(e, d, n)
 
         if p and q and not d:
             d = rsa_calc_privatekey(p, q, e)
@@ -302,7 +310,7 @@ class RSA:
         key_structs = {
             "public": RSAPublicKeyStruct(),
             "private": RSAPrivateKeyStruct()
-        } 
+        }
 
         for k in key_structs:
             try:
@@ -320,7 +328,7 @@ class RSA:
                         key_data['prime2'],
                         key_data['privateExponent']
                     )
-            except:
+            except PyAsn1Error:
                 continue
         raise ValueError('invalid key')
 
