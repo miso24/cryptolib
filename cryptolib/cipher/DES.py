@@ -1,4 +1,5 @@
 from cryptolib.encoding.bytes import long2bytes, bytes2long
+import struct
 
 
 IP = [
@@ -193,7 +194,7 @@ def crypt(plain, key, process):
         else:
             L = L ^ y
     result = permute(INV_IP, 64, merge(L, R, 32))
-    return long2bytes(result)
+    return struct.pack('>Q', result)
 
 
 def encrypt(plain, key):
