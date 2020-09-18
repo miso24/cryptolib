@@ -195,16 +195,11 @@ def inv_mix_columns(st):
             13, col[1]) ^ poly_mul(9, col[2]) ^ poly_mul(14, col[3])
 
 
-def subkey_gen(key):
+def subkey_gen(key, nr):
     kw = len(key) // 4
-    if len(key) == 16:
-        nr = 10
-    elif len(key) == 24:
-        nr = 8
-    elif len(key) == 32:
-        nr = 7
+    round_num = int(nr / (kw / 4))
     ws = [key[i:i+4] for i in range(0, len(key), 4)]
-    for i in range(nr):
+    for i in range(round_num):
         w = ws[-1]
         _, r = poly_divmod(pow(2, i), GF_MODULO)
         rcon = bytearray([r] + [0] * (kw - 1))
@@ -223,7 +218,7 @@ def subkey_gen(key):
 
 
 def _encrypt(plain, key, Nr):
-    subkeys = subkey_gen(key)
+    subkeys = subkey_gen(key, Nr)
     s = ByteMatrix(plain)
     add_round_key(s, subkeys[0])
 
@@ -240,7 +235,7 @@ def _encrypt(plain, key, Nr):
 
 
 def _decrypt(plain, key, Nr):
-    subkeys = [*reversed(subkey_gen(key))]
+    subkeys = [*reversed(subkey_gen(key, Nr))]
     s = ByteMatrix(plain)
 
     for i in range(Nr):
