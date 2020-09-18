@@ -69,15 +69,19 @@ def bytes2long(b):
         >>> bytes2long(b'AAAA')
         1094795585
         >>> bytes2long(b'Hello,World!')
-        13461770067061266287
+        22405534230757306350502175777
     """
-    b += b'\x00' * (8 - len(b) % 8)
+    if len(b) % 8 != 0:
+        b = b'\x00' * (8 - len(b) % 8) + b
     rslt = 0
     for _ in range(len(b) // 8):
+        print(b)
         rslt += struct.unpack('>Q', b[:8])[0]
+        rslt <<= 64
         b = b[8:]
+    rslt >>= 64
     return rslt
-
+    
 
 def long2bytes(long):
     """
@@ -93,15 +97,15 @@ def long2bytes(long):
     Examples:
         >>> long2bytes(0x41414141)
         b'AAAA'
-        >>> long2bytes(13461770067061266287)
+        >>> long2bytes(22405534230757306350502175777)
         b'Hello,World!'
     """
     mask = (1 << 64) - 1
     rslt = b''
     bl = byte_length(long)
     while long:
-        rslt = rslt + struct.pack('>Q', long & mask)
+        rslt = struct.pack('>Q', long & mask) + rslt
         long >>= 64
     if bl % 8 == 0:
         return rslt
-    return rslt[:-(8-bl)]
+    return rslt[(8-bl%8):]
