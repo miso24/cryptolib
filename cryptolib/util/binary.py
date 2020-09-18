@@ -75,7 +75,6 @@ def bytes2long(b):
         b = b'\x00' * (8 - len(b) % 8) + b
     rslt = 0
     for _ in range(len(b) // 8):
-        print(b)
         rslt += struct.unpack('>Q', b[:8])[0]
         rslt <<= 64
         b = b[8:]
