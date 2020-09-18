@@ -1,4 +1,4 @@
-from cryptolib.encoding.bytes import long2bytes, bytes2long
+from cryptolib.util.binary import long2bytes, bytes2long
 import struct
 
 
