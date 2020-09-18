@@ -16,7 +16,7 @@ def test_convert_long_bytes(_long, _bytes):
 
 @pytest.mark.parametrize(('_hex_prefix', '_hex', '_bytes'), [
     ('0x30', '30', b'0'),
-    ('0x41414141', '41414141', b'AAAAA'),
+    ('0x41414141', '41414141', b'AAAA'),
     ('0x48656c6c6f2c576f726c6421', '48656c6c6f2c576f726c6421', b'Hello,World!')
 ])
 def test_convert_hex_bytes(_hex_prefix, _hex, _bytes):
