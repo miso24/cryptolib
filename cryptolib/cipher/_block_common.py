@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Callable, Iterator
+from typing import Callable, Iterator
 from abc import ABCMeta, abstractmethod
 
 EncryptFunc = Callable[[bytes, bytes], bytes]
