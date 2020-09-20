@@ -1,5 +1,13 @@
+from __future__ import annotations
 from cryptolib.util.binary import long2bytes, bytes2long
+from cryptolib.cipher._block_cipher import create_cipher
+from cryptolib.cipher._block_common import BlockCipherAlgo
+from typing import TYPE_CHECKING
 import struct
+
+
+if TYPE_CHECKING:
+    from cryptolib.cipher._block_common import BlockCipherMode
 
 
 IP = [
@@ -197,9 +205,20 @@ def crypt(plain, key, process):
     return struct.pack('>Q', result)
 
 
-def encrypt(plain, key):
+def encrypt(plain: bytes, key: bytes) -> bytes:
     return crypt(plain, key, DES_ENC)
 
 
-def decrypt(plain, key):
-    return crypt(plain, key, DES_DEC)
+def decrypt(cipher: bytes, key: bytes) -> bytes:
+    return crypt(cipher, key, DES_DEC)
+
+
+def new(key: bytes, mode: int, iv: bytes = None) -> BlockCipherMode:
+    DES_algo = BlockCipherAlgo(
+        8,
+        encrypt,
+        decrypt,
+    )
+    if iv is None:
+        return create_cipher(key, DES_algo, mode)
+    return create_cipher(key, DES_algo, mode, iv)
