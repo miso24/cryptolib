@@ -1,13 +1,11 @@
-from dataclasses import dataclass
-from typing import Callable, Iterator
+from typing import Callable, Iterator, NamedTuple
 from abc import ABCMeta, abstractmethod
 
 EncryptFunc = Callable[[bytes, bytes], bytes]
 DecryptFunc = Callable[[bytes, bytes], bytes]
 
 
-@dataclass
-class BlockCipherAlgo:
+class BlockCipherAlgo(NamedTuple):
     block_size: int
     encrypt: EncryptFunc
     decrypt: DecryptFunc
