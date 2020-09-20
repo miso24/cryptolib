@@ -1,5 +1,12 @@
+from __future__ import annotations
 from functools import lru_cache
 from cryptolib.util.binary import xor_bytes
+from cryptolib.cipher._block_cipher import create_cipher
+from cryptolib.cipher._block_common import BlockCipherAlgo
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cryptolib.cipher._block_common import BlockCipherMode
 
 
 class ByteMatrix:
@@ -249,7 +256,7 @@ def _decrypt(plain, key, Nr):
     return s.bytes()
 
 
-def encrypt(plain, key):
+def encrypt(plain: bytes, key: bytes) -> bytes:
     key_length = len(key)
     if key_length == 16:
         Nr = 10
@@ -262,7 +269,7 @@ def encrypt(plain, key):
     return _encrypt(plain, key, Nr)
 
 
-def decrypt(plain, key):
+def decrypt(plain: bytes, key: bytes) -> bytes:
     key_length = len(key)
     if key_length == 16:
         Nr = 10
@@ -273,3 +280,14 @@ def decrypt(plain, key):
     else:
         raise ValueError('invalid key length')
     return _decrypt(plain, key, Nr)
+
+
+def new(key: bytes, mode: int, iv: bytes = None) -> BlockCipherMode:
+    AES_algo = BlockCipherAlgo(
+        16,
+        encrypt,
+        decrypt,
+    )
+    if iv is None:
+        return create_cipher(key, AES_algo, mode)
+    return create_cipher(key, AES_algo, mode, iv)
