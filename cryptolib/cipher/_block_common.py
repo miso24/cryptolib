@@ -27,5 +27,5 @@ class BlockCipherMode(metaclass=ABCMeta):
 
 def split_block(data: bytes, cipher_algo: BlockCipherAlgo) -> Iterator[bytes]:
     bs = cipher_algo.block_size
-    for i in range(0, len(data) // bs, bs):
-        yield data[i:i+bs]
+    for i in range(0, len(data) // bs):
+        yield data[i*bs:i*bs+bs]
