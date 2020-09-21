@@ -6,6 +6,7 @@ DecryptFunc = Callable[[bytes, bytes], bytes]
 
 
 MODE_ECB = 0
+MODE_CBC = 1
 
 
 class BlockCipherAlgo(NamedTuple):
