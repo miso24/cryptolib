@@ -7,6 +7,7 @@ from cryptolib.cipher._block_cipher import create_cipher
 from cryptolib.cipher._block_common import (
     BlockCipherAlgo,
     MODE_ECB,
+    MODE_CBC,
 )
 
 
