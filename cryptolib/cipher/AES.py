@@ -1,9 +1,14 @@
 from __future__ import annotations
 from functools import lru_cache
+from typing import TYPE_CHECKING
+
 from cryptolib.util.binary import xor_bytes
 from cryptolib.cipher._block_cipher import create_cipher
-from cryptolib.cipher._block_common import BlockCipherAlgo
-from typing import TYPE_CHECKING
+from cryptolib.cipher._block_common import (
+    BlockCipherAlgo,
+    MODE_ECB,
+)
+
 
 if TYPE_CHECKING:
     from cryptolib.cipher._block_common import BlockCipherMode

@@ -5,6 +5,9 @@ EncryptFunc = Callable[[bytes, bytes], bytes]
 DecryptFunc = Callable[[bytes, bytes], bytes]
 
 
+MODE_ECB = 0
+
+
 class BlockCipherAlgo(NamedTuple):
     block_size: int
     encrypt: EncryptFunc
