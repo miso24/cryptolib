@@ -1,0 +1,91 @@
+from cryptolib.cipher import AES
+from binascii import unhexlify
+import pytest
+
+
+test_vectors = [
+    (
+        '000102030405060708090a0b0c0d0e0f',
+        '000102030405060708090a0b0c0d0e0f',
+        '0a940bb5416ef045f1c39458c653ea5a954f64f2e4e86e9eee82d20216684899',
+    ),
+    (
+        '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+        '000102030405060708090a0b0c0d0e0f',
+        '0a940bb5416ef045f1c39458c653ea5a07feef74e1d5036e900eee118e949293954f64f2e4e86e9eee82d20216684899',
+    ),
+    (
+        '48656c6c6f2c454342206d6f646521',
+        '000102030405060708090a0b0c0d0e0f',
+        '12409c3d40dbc6d1e543eca83dcff099',
+    ),
+    (
+        '41455320286b65792d313238626974206d6f64652d45434229',
+        '000102030405060708090a0b0c0d0e0f',
+        '11858d083c8ec487a686503485cf05d18d85bbd36ed355216a026ae263ad716f'
+    ),
+    (
+        '000102030405060708090a0b0c0d0e0f',
+        '000102030405060708090a0b0c0d0e0f1011121314151617',
+        '0060bffe46834bb8da5cf9a61ff220ae3fe7286abde5f03943d5777020259626',
+    ),
+    (
+        '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+        '000102030405060708090a0b0c0d0e0f1011121314151617',
+        '0060bffe46834bb8da5cf9a61ff220ae93ae3b7f9fc2e8159d05a6a9f5e24f2d3fe7286abde5f03943d5777020259626',
+    ),
+    (
+        '48656c6c6f2c454342206d6f646521',
+        '000102030405060708090a0b0c0d0e0f1011121314151617',
+        'abcceac924d51243938aa536df57f52a',
+    ),
+    (
+        '41455320286b65792d313932626974206d6f64652d45434229',
+        '000102030405060708090a0b0c0d0e0f1011121314151617',
+        '2d0f9fc34ea3c5372d6bcf187ff1ae296350f745c460c0b8226f5114758a86bd',
+    ),
+    (
+        '000102030405060708090a0b0c0d0e0f',
+        '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+        '5a6e045708fb7196f02e553d02c3a6929f3b7504926f8bd36e3118e903a4cd4a',
+    ),
+    (
+        '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+        '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+        '5a6e045708fb7196f02e553d02c3a692e9c3ef8ab23453e6f0749cd636e7a88e9f3b7504926f8bd36e3118e903a4cd4a',
+    ),
+    (
+        '48656c6c6f2c454342206d6f646521',
+        '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+        '5ccfc06e2a31dd4fff126dad5e7f552b',
+    ),
+    (
+        '41455320286b65792d323536626979206d6f64652d45434229',
+        '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+        'b2756a48dd964e475e6107490e4a7e059b397d08189b683f7f6e24c3152b2c54',
+    )
+]
+
+
+def pad(block_size, x):
+    pad_size = block_size - (len(x) % block_size)
+    return x + bytes([pad_size] * pad_size)
+
+
+def unpad(x):
+    pad_size = x[-1]
+    return x[:-pad_size]
+
+
+@pytest.fixture(params=test_vectors)
+def vectors(request):
+    return map(unhexlify, request.param)
+
+
+def test_ecb(vectors):
+    plain, key, cipher = vectors
+    aes = AES.new(key, AES.MODE_ECB)
+    enc = aes.encrypt(pad(aes.cipher_algo.block_size, plain))
+    dec = unpad(aes.decrypt(enc))
+    assert enc == cipher
+    assert dec == plain
