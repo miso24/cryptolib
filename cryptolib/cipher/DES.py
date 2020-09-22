@@ -8,6 +8,7 @@ from cryptolib.cipher._block_common import (
     BlockCipherAlgo,
     MODE_ECB,
     MODE_CBC,
+    MODE_OFB,
 )
 
 
