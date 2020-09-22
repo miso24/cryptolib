@@ -17,14 +17,9 @@ class OFBMode(BlockCipherMode):
         rslt = b''
         tmp = self.iv
         for block in split_block(plain, self.cipher_algo):
-            tmp = self.cipher_algo.encrypt(block, self.key)
+            tmp = self.cipher_algo.encrypt(tmp, self.key)
             rslt += xor_bytes(block, tmp)
         return rslt
 
     def decrypt(self, cipher: bytes) -> bytes:
-        rslt = b''
-        tmp = self.iv
-        for block in split_block(cipher, self.cipher_algo):
-            tmp = self.cipher_algo.decrypt(block, self.key)
-            rslt += xor_bytes(block, tmp)
-        return rslt
+        return self.encrypt(cipher)
