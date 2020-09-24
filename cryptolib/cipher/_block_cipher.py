@@ -3,10 +3,12 @@ from typing import TYPE_CHECKING
 from cryptolib.cipher._ecb import ECBMode
 from cryptolib.cipher._cbc import CBCMode
 from cryptolib.cipher._ofb import OFBMode
+from cryptolib.cipher._cfb import CFBMode
 from cryptolib.cipher._block_common import (
     MODE_ECB,
     MODE_CBC,
     MODE_OFB,
+    MODE_CFB,
 )
 
 
@@ -22,4 +24,6 @@ def create_cipher(key: bytes, algo: BlockCipherAlgo, mode: int, iv: bytes = None
         return CBCMode(key, algo, iv)
     elif mode == MODE_OFB:
         return OFBMode(key, algo, iv)
+    elif mode == MODE_CFB:
+        return CFBMode(key, algo, iv)
     raise ValueError('Invalid mode')
