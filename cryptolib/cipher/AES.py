@@ -9,6 +9,7 @@ from cryptolib.cipher._block_common import (
     MODE_ECB,
     MODE_CBC,
     MODE_OFB,
+    MODE_CFB,
 )
 
 
