@@ -1,0 +1,67 @@
+from cryptolib.cipher import AES
+from binascii import unhexlify
+import pytest
+
+
+test_vectors = [
+    (
+        '000102030405060708090a0b0c0d0e0f',
+        '000102030405060708090a0b0c0d0e0f', 
+        '0a22f796e1b93e9032cff804838adfc3',
+    ),
+    (
+        '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+        '000102030405060708090a0b0c0d0e0f',
+        '0a22f796e1b93e9032cff804838adfc3a5e4b3ffdd47108575533e672ef5d8ef'
+    ),
+    (
+        '41455320286b65792d313238626974206d6f64652d43464229',
+        '000102030405060708090a0b0c0d0e0f',
+        '4bd3680846999572e8869ef071e3f6def0334d0624c203d83a',
+    ),
+    (
+        '000102030405060708090a0b0c0d0e0f',
+        '000102030405060708090a0b0c0d0e0f1011121314151617',
+        '00aa1c190d92061fcb5c470f70de74a3',
+    ),
+    (
+        '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+        '000102030405060708090a0b0c0d0e0f1011121314151617',
+        '00aa1c190d92061fcb5c470f70de74a33780cf429f4c1a7dec61d4a8d421820a',
+    ),
+    (
+        '41455320286b65792d313932626974206d6f64652d43464229',
+        '000102030405060708090a0b0c0d0e0f1011121314151617',
+        '41bc375ca50cfbbfc57fb134b1af5ba6a0dcacb678f363bcdd',
+    ),
+    (
+        '000102030405060708090a0b0c0d0e0f',
+        '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+        '5a962fda85eedcc87f8b0f4f91eda6cb',
+    ),
+    (
+        '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+        '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+        '5a962fda85eedcc87f8b0f4f91eda6cbb7a9f141c1397c7c5bb63ec37a7b82ca',
+    ),
+    (
+        '41455320286b65792d323536626974206d6f64652d43464229',
+        '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f',
+        '1b0b1568f7549e13ccea828d29c8d416c60d77c069f19a775d',
+    )
+]
+
+
+@pytest.fixture(params=test_vectors)
+def vectors(request):
+    return map(unhexlify, request.param)
+
+
+def test_cfb(vectors):
+    plain, key, cipher = vectors
+    iv = 0x000102030405060708090a0b0c0d0e0f.to_bytes(16, "big")
+    aes = AES.new(key, AES.MODE_CFB, iv)
+    enc = aes.encrypt(plain)
+    dec = aes.decrypt(enc)
+    assert enc == cipher
+    assert dec == plain
