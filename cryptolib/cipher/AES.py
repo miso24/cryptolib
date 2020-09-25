@@ -36,6 +36,9 @@ class ByteMatrix:
             print()
         print()
 
+    def at(self, x, y):
+        return self.matrix[y][x]
+
     def bytes(self):
         rslt = [0] * pow(self.size, 2)
         for j in range(self.size):
@@ -44,21 +47,19 @@ class ByteMatrix:
         return bytes(rslt)
 
     def __setitem__(self, key, value):
-        if isinstance(key, tuple) and len(key) == 2:
-            row, col = key
-            if isinstance(col, slice):
-                for idx, r in enumerate(self.matrix[col]):
-                    r[row] = value[idx]
-            else:
-                self.matrix[col][row] = value
+        row, col = key
+        if isinstance(col, slice):
+            for idx, r in enumerate(self.matrix[col]):
+                r[row] = value[idx]
+        else:
+            self.matrix[col][row] = value
 
     def __getitem__(self, item):
-        if isinstance(item, tuple) and len(item) == 2:
-            row, col = item
-            if isinstance(col, int):
-                return self.matrix[col][row]
-            elif isinstance(col, slice):
-                return [c[row] for c in self.matrix[col]]
+        row, col = item
+        if isinstance(col, int):
+            return self.matrix[col][row]
+        elif isinstance(col, slice):
+            return [c[row] for c in self.matrix[col]]
 
     @classmethod
     def from_words(cls, words, size=4):
@@ -81,13 +82,17 @@ def poly_divmod(a, b):
     return quoitent, a
 
 
+@lru_cache
 def poly_mul(a, b):
     product = 0
     while a and b:
-        if b & 1:
+        if b % 2 == 1:
             product ^= a
-        a = (a << 1) ^ (0x11b if a & 0x80 else 0x00)
-        b >>= 1
+        if a & 0x80:
+            a = (a * 2) ^ 0x11b
+        else:
+            a *= 2
+        b //= 2
     return product
 
 
@@ -161,16 +166,17 @@ def rot_word(b):
 def add_round_key(st, key):
     for j in range(4):
         for i in range(4):
-            st[i, j] = st[i, j] ^ key[i, j]
+            st[i, j] = st.at(i, j) ^ key.at(i, j)
 
 
 def mix_columns(st):
     for j in range(4):
-        col = st[j, :]
-        st[j, 0] = poly_mul(2, col[0]) ^ poly_mul(3, col[1]) ^ col[2] ^ col[3]
-        st[j, 1] = col[0] ^ poly_mul(2, col[1]) ^ poly_mul(3, col[2]) ^ col[3]
-        st[j, 2] = col[0] ^ col[1] ^ poly_mul(2, col[2]) ^ poly_mul(3, col[3])
-        st[j, 3] = poly_mul(3, col[0]) ^ col[1] ^ col[2] ^ poly_mul(2, col[3])
+        c0, c1 = st.at(j, 0), st.at(j, 1)
+        c2, c3 = st.at(j, 2), st.at(j, 3)
+        st[j, 0] = poly_mul(2, c0) ^ poly_mul(3, c1) ^ c2 ^ c3
+        st[j, 1] = c0 ^ poly_mul(2, c1) ^ poly_mul(3, c2) ^ c3
+        st[j, 2] = c0 ^ c1 ^ poly_mul(2, c2) ^ poly_mul(3, c3)
+        st[j, 3] = poly_mul(3, c0) ^ c1 ^ c2 ^ poly_mul(2, c3)
 
 
 def shift_rows(st):
@@ -181,15 +187,13 @@ def shift_rows(st):
 def sub_bytes(st):
     for j in range(4):
         for i in range(4):
-            val = st[i, j]
-            st[i, j] = SBOX[(val >> 4) * 16 + (val & 0xf)]
+            st[i, j] = SBOX[(st.at(i, j) >> 4) * 16 + (st.at(i, j) & 0xf)]
 
 
 def inv_sub_bytes(st):
     for j in range(4):
         for i in range(4):
-            val = st[i, j]
-            st[i, j] = INV_SBOX[(val >> 4) * 16 + (val & 0xf)]
+            st[i, j] = INV_SBOX[(st.at(i, j) >> 4) * 16 + (st.at(i, j) & 0xf)]
 
 
 def inv_shift_rows(st):
@@ -199,17 +203,15 @@ def inv_shift_rows(st):
 
 def inv_mix_columns(st):
     for j in range(4):
-        col = st[j, :]
-        st[j, 0] = poly_mul(14, col[0]) ^ poly_mul(
-            11, col[1]) ^ poly_mul(13, col[2]) ^ poly_mul(9, col[3])
-        st[j, 1] = poly_mul(9, col[0]) ^ poly_mul(
-            14, col[1]) ^ poly_mul(11, col[2]) ^ poly_mul(13, col[3])
-        st[j, 2] = poly_mul(13, col[0]) ^ poly_mul(
-            9, col[1]) ^ poly_mul(14, col[2]) ^ poly_mul(11, col[3])
-        st[j, 3] = poly_mul(11, col[0]) ^ poly_mul(
-            13, col[1]) ^ poly_mul(9, col[2]) ^ poly_mul(14, col[3])
+        c0, c1 = st.at(j, 0), st.at(j, 1)
+        c2, c3 = st.at(j, 2), st.at(j, 3)
+        st[j, 0] = poly_mul(14, c0) ^ poly_mul(11, c1) ^ poly_mul(13, c2) ^ poly_mul(9, c3)
+        st[j, 1] = poly_mul(9, c0) ^ poly_mul(14, c1) ^ poly_mul(11, c2) ^ poly_mul(13, c3)
+        st[j, 2] = poly_mul(13, c0) ^ poly_mul(9, c1) ^ poly_mul(14, c2) ^ poly_mul(11, c3)
+        st[j, 3] = poly_mul(11, c0) ^ poly_mul(13, c1) ^ poly_mul(9, c2) ^ poly_mul(14, c3)
 
 
+@lru_cache
 def subkey_gen(key, nr):
     kw = len(key) // 4
     round_num = int(nr / (kw / 4))
@@ -296,6 +298,4 @@ def new(key: bytes, mode: int, iv: bytes = None) -> BlockCipherMode:
         encrypt,
         decrypt,
     )
-    if iv is None:
-        return create_cipher(key, AES_algo, mode)
     return create_cipher(key, AES_algo, mode, iv)
