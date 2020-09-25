@@ -6,7 +6,7 @@ import math
 import random
 
 from cryptolib.encoding import pem
-from cryptolib.encoding.bytes import bytes2long
+from cryptolib.util.binary import bytes2long
 from cryptolib.number import (
     lcm,
     inverse_mod,
@@ -317,16 +317,17 @@ class RSA:
                 key_data, _ = decoder.decode(data, asn1Spec=key_structs[k])
                 if k == "public":
                     return cls.construct(
-                        key_data['modulus'],
-                        key_data['publicExponent']
+                        int(key_data['modulus']),
+                        int(key_data['publicExponent'])
                     )
                 else:
+                    print(key_data)
                     return cls.construct(
-                        key_data['modulus'],
-                        key_data['publicExponent'],
-                        key_data['prime1'],
-                        key_data['prime2'],
-                        key_data['privateExponent']
+                        int(key_data['modulus']),
+                        int(key_data['publicExponent']),
+                        int(key_data['prime1']),
+                        int(key_data['prime2']),
+                        int(key_data['privateExponent'])
                     )
             except PyAsn1Error:
                 continue
