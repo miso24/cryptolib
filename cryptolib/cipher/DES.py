@@ -226,6 +226,4 @@ def new(key: bytes, mode: int, iv: bytes = None) -> BlockCipherMode:
         encrypt,
         decrypt,
     )
-    if iv is None:
-        return create_cipher(key, DES_algo, mode)
     return create_cipher(key, DES_algo, mode, iv)
