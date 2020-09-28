@@ -1,4 +1,4 @@
-from cryptolib.encoding import bytes2long
+from cryptolib.util.binary import bytes2long
 import struct
 import base64
 
