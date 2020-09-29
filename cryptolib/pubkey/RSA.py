@@ -4,6 +4,7 @@ from pyasn1.codec.der import decoder, encoder
 from pyasn1.error import PyAsn1Error
 import math
 import random
+import gmpy2
 
 from cryptolib.encoding import pem
 from cryptolib.util.binary import bytes2long
@@ -13,120 +14,6 @@ from cryptolib.number import (
     get_prime,
     is_coprime
 )
-
-
-def rsa_calc_privatekey(p, q, e):
-    """Calc private key
-
-    calculate RSA private key
-
-    Args:
-        p (long): prime 1
-        q (long): prime 2
-        e (long): public key e
-
-    Returns:
-        long: private key
-    """
-    L = lcm(p - 1, q - 1)
-    d = inverse_mod(e, L)
-    return d
-
-
-def rsa_encrypt(m, e, n):
-    """RSA encrypt
-
-    encrypt plaintext
-
-    Args:
-        m (Union[int, bytes, str]): plaintext
-        n (int): public key n
-        e (int): public key e
-
-    Returns:
-        int: ciphertext
-    """
-    if isinstance(m, bytes):
-        m = bytes2long(m)
-    elif isinstance(m, str):
-        m = bytes2long(m.encode())
-
-    return pow(m, e, n)
-
-
-def rsa_decrypt(c, d, n):
-    """RSA decrypt
-
-    decrypt ciphertext
-
-    Args:
-        c (int): ciphertext
-        n (int): public key n
-        d (int): private key d
-
-    Returns:
-        int: plaintext
-    """
-    return pow(c, d, n)
-
-
-def rsa_keygen(k):
-    """RSA keygen
-
-    generate RSA key
-
-    Args:
-        k (int): security paramator
-
-    Returns:
-        long: public key n
-        long: public key e
-        long: private key d
-    """
-    p = get_prime(k // 2)
-    q = get_prime(k // 2)
-
-    while not is_coprime(p, q):
-        q = get_prime(k // 2)
-
-    n = p * q
-    e = 65537
-    d = rsa_calc_privatekey(p, q, e)
-    return n, e, d
-
-
-def rsa_primes_from_privatekey(e, d, n, t=100):
-    """
-
-    calculate primes from private key
-
-    Args:
-        e (long): public exponent
-        d (long): private key
-        n (long): public key
-        t (int): num of challenges
-
-    Returns:
-        long: prime p
-        long: prime q
-
-    Refs:
-        - http://elliptic-shiho.hatenablog.com/entry/2015/12/14/043745
-    """
-    k = d * e - 1
-    for _ in range(t):
-        g = random.randint(2, n - 1)
-        t = k
-        while True:
-            x = pow(g, t, n)
-            t //= 2
-            if x > 1 and math.gcd(x - 1, n) > 1:
-                p = math.gcd(x - 1, n)
-                q = n // p
-                return p, q
-            if t == 0:
-                break
-    return -1, -1
 
 
 class RSAPrivateKeyStruct(univ.Sequence):
@@ -247,107 +134,221 @@ class RSA:
         encoded = encoder.encode(key_struct)
         return encoded
 
-    @classmethod
-    def generate(cls, k, e=65537):
-        """
 
-        generate RSA key
+def calc_privatekey(p, q, e):
+    """Calc private key
 
-        Args:
-            k (int): security paramator
+    calculate RSA private key
 
-        Returns:
-            RSA: RSA object
-        """
-        p = get_prime(k // 2)
+    Args:
+        p (long): prime 1
+        q (long): prime 2
+        e (long): public key e
+
+    Returns:
+        long: private key
+    """
+    L = lcm(p - 1, q - 1)
+    d = inverse_mod(e, L)
+    return d
+
+
+def encrypt(m, e, n):
+    """RSA encrypt
+
+    encrypt plaintext
+
+    Args:
+        m (Union[int, bytes, str]): plaintext
+        n (int): public key n
+        e (int): public key e
+
+    Returns:
+        int: ciphertext
+    """
+    if isinstance(m, bytes):
+        m = bytes2long(m)
+    elif isinstance(m, str):
+        m = bytes2long(m.encode())
+
+    return pow(m, e, n)
+
+
+def decrypt(c, d, n):
+    """RSA decrypt
+
+    decrypt ciphertext
+
+    Args:
+        c (int): ciphertext
+        n (int): public key n
+        d (int): private key d
+
+    Returns:
+        int: plaintext
+    """
+    return pow(c, d, n)
+
+
+def keygen(k):
+    """RSA keygen
+
+    generate RSA key
+
+    Args:
+        k (int): security paramator
+
+    Returns:
+        long: public key n
+        long: public key e
+        long: private key d
+    """
+    p = get_prime(k // 2)
+    q = get_prime(k // 2)
+
+    while not is_coprime(p, q):
         q = get_prime(k // 2)
 
-        while not is_coprime(p, q):
-            q = get_prime(k // 2)
+    n = p * q
+    e = 65537
+    d = calc_privatekey(p, q, e)
+    return n, e, d
 
-        n = p * q
-        d = rsa_calc_privatekey(p, q, e)
-        return cls(n, e, p, q, d)
 
-    @classmethod
-    def construct(cls, n, e, p=None, q=None, d=None):
-        """
+def _primes_from_privatekey(e, d, n, t=100):
+    """
 
-        Construct
+    calculate primes from private key
 
-        Args:
-            n (int): modulus
-            e (int): public exponent
-            p (int, optional): prime 1
-            q (int, optional): prime 2
-            d (int, optional): private exponent
+    Args:
+        e (long): public exponent
+        d (long): private key
+        n (long): public key
+        t (int): num of challenges
 
-        Returns:
-            RSA: RSA object
-        """
-        if not n or not e:
-            raise ValueError('n or e needed!')
+    Returns:
+        long: prime p
+        long: prime q
 
-        if d:
-            p, q = rsa_primes_from_privatekey(e, d, n)
+    Refs:
+        - http://elliptic-shiho.hatenablog.com/entry/2015/12/14/043745
+    """
+    k = gmpy2.mpz(d * e - 1)
+    for _ in range(t):
+        g = gmpy2.mpz(random.randint(2, n - 1))
+        t = k
+        while True:
+            x = gmpy2.powmod(g, t, n)
+            t //= 2
+            if x > 1 and gmpy2.gcd(x - 1, n) > 1:
+                p = gmpy2.gcd(x - 1, n)
+                q = n // p
+                return int(p), int(q)
+            if t == 0:
+                break
+    return -1, -1
 
-        if p and q and not d:
-            d = rsa_calc_privatekey(p, q, e)
-        return cls(n, e, p, q, d)
 
-    @classmethod
-    def import_key_der(cls, data):
-        """
+def generate(k, e=65537):
+    """
 
-        Import RSA key (der)
+    generate RSA key
 
-        Args:
-            data (bytes): key data
+    Args:
+        k (int): security paramator
+        e (int): public exponent
 
-        Returns:
-            RSA: RSA object
-        """
-        key_structs = {
-            "public": RSAPublicKeyStruct(),
-            "private": RSAPrivateKeyStruct()
-        }
+    Returns:
+        RSA: RSA object
+    """
+    p = get_prime(k // 2)
+    q = get_prime(k // 2)
 
-        for k in key_structs:
-            try:
-                key_data, _ = decoder.decode(data, asn1Spec=key_structs[k])
-                if k == "public":
-                    return cls.construct(
-                        int(key_data['modulus']),
-                        int(key_data['publicExponent'])
-                    )
-                else:
-                    print(key_data)
-                    return cls.construct(
-                        int(key_data['modulus']),
-                        int(key_data['publicExponent']),
-                        int(key_data['prime1']),
-                        int(key_data['prime2']),
-                        int(key_data['privateExponent'])
-                    )
-            except PyAsn1Error:
-                continue
-        raise ValueError('invalid key')
+    while not is_coprime(p, q):
+        q = get_prime(k // 2)
 
-    @classmethod
-    def import_key_pem(cls, data):
-        """
+    n = p * q
+    d = calc_privatekey(p, q, e)
+    return RSA(n, e, p, q, d)
 
-        Import RSA key (pem)
 
-        Args:
-            data (str): key data
+def construct(n, e, p=None, q=None, d=None):
+    """
 
-        Returns:
-            RSA: RSA object
-        """
-        pem_decoded = pem.decode(data)
-        if pem_decoded.get(pem.RSA_PRIVATE):
-            return cls.import_key_der(pem_decoded[pem.RSA_PRIVATE][0])
-        elif pem_decoded.get(pem.RSA_PUBLIC):
-            return cls.import_key_der(pem_decoded[pem.RSA_PUBLIC][0])
-        raise ValueError('invalid key')
+    Construct
+
+    Args:
+        n (int): modulus
+        e (int): public exponent
+        p (int, optional): prime 1
+        q (int, optional): prime 2
+        d (int, optional): private exponent
+
+    Returns:
+        RSA: RSA object
+    """
+    if not n or not e:
+        raise ValueError('n or e needed!')
+
+    if d:
+        p, q = _primes_from_privatekey(e, d, n)
+
+    if p and q and not d:
+        d = calc_privatekey(p, q, e)
+    return RSA(n, e, p, q, d)
+
+
+def import_key_der(data):
+    """
+
+    Import RSA key (der)
+
+    Args:
+        data (bytes): key data
+
+    Returns:
+        RSA: RSA object
+    """
+    key_structs = {
+        "public": RSAPublicKeyStruct(),
+        "private": RSAPrivateKeyStruct()
+    }
+
+    for k in key_structs:
+        try:
+            key_data, _ = decoder.decode(data, asn1Spec=key_structs[k])
+            if k == "public":
+                return construct(
+                    int(key_data['modulus']),
+                    int(key_data['publicExponent'])
+                )
+            else:
+                return construct(
+                    int(key_data['modulus']),
+                    int(key_data['publicExponent']),
+                    int(key_data['prime1']),
+                    int(key_data['prime2']),
+                    int(key_data['privateExponent'])
+                )
+        except PyAsn1Error:
+            continue
+    raise ValueError('invalid key')
+
+
+def import_key_pem(data):
+    """
+
+    Import RSA key (pem)
+
+    Args:
+        data (str): key data
+
+    Returns:
+        RSA: RSA object
+    """
+    pem_decoded = pem.decode(data)
+    if pem_decoded.get(pem.RSA_PRIVATE):
+        return import_key_der(pem_decoded[pem.RSA_PRIVATE][0])
+    elif pem_decoded.get(pem.RSA_PUBLIC):
+        return import_key_der(pem_decoded[pem.RSA_PUBLIC][0])
+    raise ValueError('invalid key')
