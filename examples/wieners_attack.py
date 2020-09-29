@@ -1,7 +1,7 @@
-from cryptolib.number import *
-from cryptolib.cipher.RSA import *
+from cryptolib.number import get_prime
+from cryptolib.pubkey.RSA import rsa_calc_privatekey, rsa_decrypt, RSA
 from cryptolib.attack.RSA import wieners_attack
-from cryptolib.encoding.bytes import *
+from cryptolib.util.binary import long2bytes
 
 p = get_prime(512)
 q = get_prime(512)

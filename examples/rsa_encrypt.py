@@ -1,5 +1,5 @@
 from cryptolib.pubkey import RSA
-from cryptolib.encoding.bytes import bytes2long, long2bytes
+from cryptolib.util.binary import long2bytes
 
 rsa = RSA.generate(1024)
 

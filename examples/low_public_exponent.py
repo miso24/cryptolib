@@ -1,5 +1,4 @@
-from cryptolib.encoding.bytes import bytes2long, long2bytes
-from cryptolib.number import lcm, inverse_mod
+from cryptolib.util.binary import long2bytes
 from cryptolib.pubkey import RSA
 from cryptolib.attack.RSA import low_public_exponent_attack
 

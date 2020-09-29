@@ -1,6 +1,6 @@
-from cryptolib.number import *
-from cryptolib.encoding.bytes import *
-from cryptolib.pubkey.RSA import *
+from cryptolib.number import get_prime
+from cryptolib.util.binary import long2bytes
+from cryptolib.pubkey.RSA import rsa_encrypt
 from cryptolib.attack.RSA import hasteds_broadcast_attack
 
 m = b'crypto{h4s73ds_br0adc45t_a7t4ck}'

@@ -1,5 +1,5 @@
 from cryptolib.number import get_prime
-from cryptolib.encoding.bytes import long2bytes, bytes2long
+from cryptolib.util.binary import long2bytes
 from cryptolib.pubkey import RSA
 from cryptolib.attack.RSA import common_modulus_attack
 
