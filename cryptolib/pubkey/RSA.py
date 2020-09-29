@@ -323,7 +323,6 @@ def import_key_der(data):
                     int(key_data['publicExponent'])
                 )
             else:
-                print(key_data)
                 return construct(
                     int(key_data['modulus']),
                     int(key_data['publicExponent']),
