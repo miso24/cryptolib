@@ -2,15 +2,15 @@ import struct
 import math
 
 
-def xor_bytes(a, b):
+def xor_bytes(a: bytes, b: bytes) -> bytes:
     return bytes([x ^ y for x, y in zip(a, b)])
 
 
-def byte_length(long):
+def byte_length(long: int) -> int:
     return math.ceil(long.bit_length() / 8)
 
 
-def hex2bytes(h):
+def hex2bytes(h: str) -> bytes:
     """
 
     convert hex to bytes
@@ -32,7 +32,7 @@ def hex2bytes(h):
     return bytes.fromhex(h)
 
 
-def hex2long(h):
+def hex2long(h: str) -> int:
     """
 
     convert hex to long
@@ -54,7 +54,7 @@ def hex2long(h):
     return int(h, 16)
 
 
-def bytes2long(b):
+def bytes2long(b: bytes) -> int:
     """
 
     convert bytes to long
@@ -80,9 +80,9 @@ def bytes2long(b):
         b = b[8:]
     rslt >>= 64
     return rslt
-    
 
-def long2bytes(long):
+
+def long2bytes(long: int) -> bytes:
     """
 
     convert long to bytes
@@ -107,4 +107,4 @@ def long2bytes(long):
         long >>= 64
     if bl % 8 == 0:
         return rslt
-    return rslt[(8-bl%8):]
+    return rslt[(8-bl % 8):]
