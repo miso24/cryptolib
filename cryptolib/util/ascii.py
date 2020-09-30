@@ -1,23 +1,23 @@
 import string
 
 
-def upper2idx(c):
+def upper2idx(c: str) -> int:
     return string.ascii_uppercase.index(c)
 
 
-def lower2idx(c):
+def lower2idx(c: str) -> int:
     return string.ascii_lowercase.index(c)
 
 
-def idx2lower(idx):
+def idx2lower(idx: int) -> str:
     return string.ascii_lowercase[idx]
 
 
-def idx2upper(idx):
+def idx2upper(idx: int) -> str:
     return string.ascii_uppercase[idx]
 
 
-def alphabet_idx(c):
+def alphabet_idx(c: str) -> int:
     """
     Alphabet
 
