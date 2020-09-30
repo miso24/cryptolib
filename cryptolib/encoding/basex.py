@@ -1,4 +1,5 @@
 from cryptolib.util.binary import bytes2long
+from typing import Union
 import struct
 import base64
 
@@ -6,13 +7,13 @@ import base64
 _b58table = b'123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
 
-def b16dec(data):
+def b16dec(data: Union[str, bytes]) -> bytes:
     """
 
     Base16 decode
 
     Args:
-        data (bytes)
+        data (Union[str, bytes])
 
     Returns:
         bytes: decoded data
@@ -20,7 +21,7 @@ def b16dec(data):
     return base64.b16decode(data)
 
 
-def b16enc(data):
+def b16enc(data: bytes) -> bytes:
     """
 
     Base16 encode
@@ -34,13 +35,13 @@ def b16enc(data):
     return base64.b16encode(data)
 
 
-def b32dec(data):
+def b32dec(data: Union[str, bytes]) -> bytes:
     """
 
     Base32 decode
 
     Args:
-        data (bytes)
+        data (Union[str, bytes])
 
     Returns:
         bytes: decoded data
@@ -48,7 +49,7 @@ def b32dec(data):
     return base64.b32decode(data)
 
 
-def b32enc(data):
+def b32enc(data: bytes) -> bytes:
     """
 
     Base32 encode
@@ -62,20 +63,17 @@ def b32enc(data):
     return base64.b32encode(data)
 
 
-def b58enc(data):
+def b58enc(data: bytes) -> bytes:
     """
 
     Base58 encode
 
     Args:
-        data (Union[str, bytes])
+        data (bytes)
 
     Returns:
         bytes: encoded data
     """
-    if isinstance(data, str):
-        data = data.encode()
-
     long = bytes2long(data)
     rslt = b''
 
@@ -85,7 +83,7 @@ def b58enc(data):
     return rslt
 
 
-def b58dec(data):
+def b58dec(data: Union[str, bytes]) -> bytes:
     """
 
     Base58 decode
@@ -96,7 +94,6 @@ def b58dec(data):
     Returns:
         bytes: decoded data
     """
-
     if isinstance(data, str):
         data = data.encode()
 
@@ -112,13 +109,13 @@ def b58dec(data):
     return rslt
 
 
-def b64dec(data):
+def b64dec(data: Union[str, bytes]) -> bytes:
     """
 
     Base64 decode
 
     Args:
-        data (bytes)
+        data (Union[str, bytes])
 
     Returns:
         bytes: decoded data
@@ -126,7 +123,7 @@ def b64dec(data):
     return base64.b64decode(data)
 
 
-def b64enc(data):
+def b64enc(data: bytes) -> bytes:
     """
 
     Base64 encode
@@ -140,13 +137,13 @@ def b64enc(data):
     return base64.b64encode(data)
 
 
-def b85dec(data):
+def b85dec(data: Union[str, bytes]) -> bytes:
     """
 
     Base85 decode
 
     Args:
-        data (bytes)
+        data (Union[str, bytes])
 
     Returns:
         bytes: decoded data
@@ -154,7 +151,7 @@ def b85dec(data):
     return base64.b85decode(data)
 
 
-def b85enc(data):
+def b85enc(data: bytes) -> bytes:
     """
 
     Base85 encode
