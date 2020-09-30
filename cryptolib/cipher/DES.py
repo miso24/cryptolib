@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import List, Tuple, TYPE_CHECKING
 import struct
 
 from cryptolib.util.binary import long2bytes, bytes2long
@@ -140,7 +140,7 @@ DES_ENC = 0
 DES_DEC = 1
 
 
-def permute(table, size, x):
+def permute(table: List[int], size: int, x: int) -> int:
     rslt = 0
     for d in table:
         if x & (1 << (size - d)):
@@ -150,7 +150,7 @@ def permute(table, size, x):
     return rslt
 
 
-def shift_left(x, size):
+def shift_left(x: int, size: int) -> int:
     return ((x << size) | (x >> (28 - size))) & 0xfffffff
 
 
@@ -158,7 +158,7 @@ def shift_right(x, size):
     return (x >> size) | (x << (28 - size) & 0xfffffff)
 
 
-def subkey_gen(key):
+def subkey_gen(key: int) -> List[int]:
     subkeys = []
     reduce_key = permute(PC1, 64, key)
     Ci, Di = split(reduce_key, 28)
@@ -169,16 +169,16 @@ def subkey_gen(key):
     return subkeys
 
 
-def split(x, size):
+def split(x: int, size: int) -> Tuple[int, int]:
     mask = pow(2, size) - 1
     return (x & (mask << size)) >> size, x & mask
 
 
-def merge(a, b, size):
+def merge(a: int, b: int, size: int) -> int:
     return a << size | b
 
 
-def round_f(x, sub_key):
+def round_f(x: int, sub_key: int) -> int:
     _x = permute(E, 32, x)
     _x ^= sub_key
     y = 0
@@ -194,11 +194,11 @@ def round_f(x, sub_key):
     return permute(P, 32, y)
 
 
-def crypt(plain, key, process):
-    plain, key = map(bytes2long, [plain, key])
-    plain = permute(IP, 64, plain)
-    L, R = split(plain, 32)
-    sub_keys = subkey_gen(key)
+def crypt(plain: bytes, key: bytes, process: int) -> bytes:
+    _plain, _key = map(bytes2long, [plain, key])
+    _plain = permute(IP, 64, _plain)
+    L, R = split(_plain, 32)
+    sub_keys = subkey_gen(_key)
     for i in range(16):
         if process == DES_ENC:
             y = round_f(R, sub_keys[i])
