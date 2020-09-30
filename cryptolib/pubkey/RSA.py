@@ -119,8 +119,8 @@ class RSA:
         key_struct['modulus'] = self.n
         key_struct['publicExponent'] = self.e
         key_struct['privateExponent'] = self.d
-        key_struct['prime1'] = self.n
-        key_struct['prime2'] = self.n
+        key_struct['prime1'] = self.p
+        key_struct['prime2'] = self.q
         key_struct['exponent1'] = self.d % (self.p - 1)
         key_struct['exponent2'] = self.d % (self.q - 1)
         key_struct['coefficient'] = inverse_mod(self.p, self.q)
