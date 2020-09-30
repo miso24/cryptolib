@@ -1,7 +1,8 @@
+from cryptolib.encoding.basex import b64dec, b64enc
+from typing import Dict, Union
 import textwrap
 import re
 
-from cryptolib.encoding.basex import b64dec, b64enc
 
 # PEM STRING
 X509_OLD = "X509 CERTIFICATE"
@@ -31,7 +32,7 @@ PARAMETERS = "PARAMETERS"
 CMS = "CMS"
 
 
-def encode(data, label):
+def encode(data: bytes, label: str) -> bytes:
     """
 
     PEM encode
@@ -41,7 +42,7 @@ def encode(data, label):
         label (str)
 
     Returns:
-        str: PEM encoded data
+        bytes: PEM encoded data
     """
     encoded_data = b64enc(data).decode()
     wrapped_data = textwrap.fill(encoded_data, width=64)
@@ -49,10 +50,10 @@ def encode(data, label):
     pem_data = f"-----BEGIN {label}-----\n"
     pem_data += wrapped_data + "\n"
     pem_data += f"-----END {label}-----"
-    return pem_data
+    return pem_data.encode()
 
 
-def decode(pem_data):
+def decode(pem_data: Union[str, bytes]) -> Dict[str, bytes]:
     """
 
     PEM decode
@@ -61,8 +62,10 @@ def decode(pem_data):
         pem_data (str): PEM encoded data
 
     Returns:
-        Dictionary[bytes]: PEM decoded data
+        Dict[str, bytes]: PEM decoded data
     """
+    if isinstance(pem_data, bytes):
+        pem_data = pem_data.decode()
     rslt = {}
     pattern = re.compile(
         r"-----BEGIN (?P<marker>[A-Z\s]+)-----\n(.+?)\n-----END (?P=marker)-----\n?", re.DOTALL)
