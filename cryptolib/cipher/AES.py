@@ -1,6 +1,6 @@
 from __future__ import annotations
 from functools import lru_cache
-from typing import TYPE_CHECKING
+from typing import List, Tuple, TYPE_CHECKING
 
 from cryptolib.util.binary import xor_bytes
 from cryptolib.cipher._block_cipher import create_cipher
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 class ByteMatrix:
-    def __init__(self, data, size=4):
+    def __init__(self, data: bytes, size=4) -> None:
         assert(size ** 2 == len(data))
 
         self.size = size
@@ -29,17 +29,17 @@ class ByteMatrix:
                 row.append(data[i*size+j])
             self.matrix.append(row)
 
-    def pprint(self):
+    def pprint(self) -> None:
         for j in range(self.size):
             for i in range(self.size):
                 print("%02x " % self.matrix[j][i], end="")
             print()
         print()
 
-    def at(self, x, y):
+    def at(self, x: int, y: int) -> int:
         return self.matrix[y][x]
 
-    def bytes(self):
+    def bytes(self) -> bytes:
         rslt = [0] * pow(self.size, 2)
         for j in range(self.size):
             for i in range(self.size):
@@ -70,7 +70,7 @@ class ByteMatrix:
 GF_MODULO = 0b100011011
 
 
-def poly_divmod(a, b):
+def poly_divmod(a: int, b: int) -> Tuple[int, int]:
     if b == 1:
         return a, 0
     al, bl = a.bit_length(), b.bit_length()
@@ -83,7 +83,7 @@ def poly_divmod(a, b):
 
 
 @lru_cache
-def poly_mul(a, b):
+def poly_mul(a: int, b: int) -> int:
     product = 0
     while a and b:
         if b % 2 == 1:
@@ -96,7 +96,7 @@ def poly_mul(a, b):
     return product
 
 
-def poly_exgcd(a, b):
+def poly_exgcd(a: int, b: int) -> Tuple[int, int, int]:
     x0, y0, x1, y1 = 0, 1, 1, 0
     while True:
         q, r = poly_divmod(b, a)
@@ -109,7 +109,7 @@ def poly_exgcd(a, b):
 
 
 @lru_cache
-def poly_inverse(x):
+def poly_inverse(x: int) -> int:
     inv, _, _ = poly_exgcd(x, GF_MODULO)
     return inv
 
@@ -155,21 +155,21 @@ INV_SBOX = [
 ]
 
 
-def sub_word(b_array):
-    return bytearray([SBOX[(b >> 4) * 16 + (b & 0xf)] for b in b_array])
+def sub_word(b_array: bytes) -> bytes:
+    return bytes([SBOX[(b >> 4) * 16 + (b & 0xf)] for b in b_array])
 
 
-def rot_word(b):
+def rot_word(b: bytes) -> bytes:
     return b[1:] + b[:1]
 
 
-def add_round_key(st, key):
+def add_round_key(st: ByteMatrix, key: ByteMatrix):
     for j in range(4):
         for i in range(4):
             st[i, j] = st.at(i, j) ^ key.at(i, j)
 
 
-def mix_columns(st):
+def mix_columns(st: ByteMatrix):
     for j in range(4):
         c0, c1 = st.at(j, 0), st.at(j, 1)
         c2, c3 = st.at(j, 2), st.at(j, 3)
@@ -179,29 +179,29 @@ def mix_columns(st):
         st[j, 3] = poly_mul(3, c0) ^ c1 ^ c2 ^ poly_mul(2, c3)
 
 
-def shift_rows(st):
+def shift_rows(st: ByteMatrix):
     for i in range(4):
         st[:, i] = st[i:, i] + st[:i, i]
 
 
-def sub_bytes(st):
+def sub_bytes(st: ByteMatrix):
     for j in range(4):
         for i in range(4):
             st[i, j] = SBOX[(st.at(i, j) >> 4) * 16 + (st.at(i, j) & 0xf)]
 
 
-def inv_sub_bytes(st):
+def inv_sub_bytes(st: ByteMatrix):
     for j in range(4):
         for i in range(4):
             st[i, j] = INV_SBOX[(st.at(i, j) >> 4) * 16 + (st.at(i, j) & 0xf)]
 
 
-def inv_shift_rows(st):
+def inv_shift_rows(st: ByteMatrix):
     for i in range(4):
         st[:, i] = st[-i:, i] + st[:-i, i]
 
 
-def inv_mix_columns(st):
+def inv_mix_columns(st: ByteMatrix):
     for j in range(4):
         c0, c1 = st.at(j, 0), st.at(j, 1)
         c2, c3 = st.at(j, 2), st.at(j, 3)
@@ -212,7 +212,7 @@ def inv_mix_columns(st):
 
 
 @lru_cache
-def subkey_gen(key, nr):
+def subkey_gen(key: bytes, nr: int) -> List[ByteMatrix]:
     kw = len(key) // 4
     round_num = int(nr / (kw / 4))
     ws = [key[i:i+4] for i in range(0, len(key), 4)]
@@ -221,7 +221,7 @@ def subkey_gen(key, nr):
         _, r = poly_divmod(pow(2, i), GF_MODULO)
         rcon = bytearray([r] + [0] * (kw - 1))
         temp = xor_bytes(sub_word(rot_word(w)), rcon)
-        nw = [None] * kw
+        nw = [b''] * kw
         for j in range(kw):
             if kw == 8 and j == 4:
                 temp = sub_word(temp)
@@ -234,7 +234,7 @@ def subkey_gen(key, nr):
     return subkeys
 
 
-def _encrypt(plain, key, Nr):
+def _encrypt(plain: bytes, key: bytes, Nr: int) -> bytes:
     subkeys = subkey_gen(key, Nr)
     s = ByteMatrix(plain)
     add_round_key(s, subkeys[0])
@@ -251,7 +251,7 @@ def _encrypt(plain, key, Nr):
     return s.bytes()
 
 
-def _decrypt(plain, key, Nr):
+def _decrypt(plain: bytes, key: bytes, Nr: int) -> bytes:
     subkeys = [*reversed(subkey_gen(key, Nr))]
     s = ByteMatrix(plain)
 
