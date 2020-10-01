@@ -1,7 +1,18 @@
 from cryptolib.util.ascii import upper2idx, lower2idx, idx2upper, idx2lower
 
 
-def vigenere_encrypt(plain, key):
+def encrypt(plain: str, key: str) -> str:
+    """
+    
+    Vigenere cipher: encrypt
+
+    Args
+        plain (str)
+        key (str)
+
+    Returns:
+        str
+    """
     rslt = ""
     for idx, c in enumerate(plain):
         if not c.isalpha():
@@ -16,7 +27,18 @@ def vigenere_encrypt(plain, key):
     return rslt
 
 
-def vigenere_decrypt(cipher, key):
+def decrypt(cipher: str, key: str) -> str:
+    """
+    
+    Vigenere cipher: decrypt
+
+    Args:
+        cipher (str)
+        key (str)
+
+    Returns:
+        str
+    """
     rslt = ""
     for idx, c in enumerate(cipher):
         if not c.isalpha():
