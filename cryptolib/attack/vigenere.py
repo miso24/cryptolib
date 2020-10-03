@@ -21,7 +21,7 @@ english_freq = {
 }
 
 
-def reduce_gcd(l):
+def reduce_gcd(l: List[int]) -> int:
     return functools.reduce(math.gcd, l)
 
 
@@ -65,7 +65,6 @@ def freq_analysis(c: str, key_length: int) -> Tuple[str, float]:
 
 
 def kasisky_test(c: str, n_max: int = 10) -> Set[int]:
-    c = re.sub(r'(\s|[^a-zA-Z])', '', c)
     candidates = set()
     # guess key length
     for n in range(2, n_max + 1):
@@ -107,10 +106,11 @@ def break_cipher(cipher: str) -> Tuple[str, List[str]]:
         str: the most probability key
         List[str]: key candidates
     """
-    key_lens = kasisky_test(cipher)
+    _cipher = re.sub(r'(\s|[^a-zA-Z])', '', cipher).lower()
+    key_lens = kasisky_test(_cipher)
     guess_keys = {}
     for l in key_lens:
-        key, dist = freq_analysis(cipher, l)
+        key, dist = freq_analysis(_cipher, l)
         guess_keys[key] = dist
     best_key = sorted(guess_keys, key=lambda x: guess_keys[x])[0]
     return best_key, [*guess_keys.keys()]
