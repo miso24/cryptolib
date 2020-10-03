@@ -1,12 +1,14 @@
-import collections
 import functools
-import itertools
-import string
 import math
 import re
 
-from cryptolib.cipher.vigenere import *
-from cryptolib.util.ascii import *
+from collections import Counter
+from typing import List, Tuple, Set
+from cryptolib.util.ascii import (
+    idx2lower,
+    alphabet_idx,
+)
+
 
 english_freq = {
     'a': 0.084970, 'b': 0.014920, 'c': 0.022020, 'd': 0.042530,
@@ -23,7 +25,7 @@ def reduce_gcd(l):
     return functools.reduce(math.gcd, l)
 
 
-def n_gram(n, text):
+def n_gram(n: int, text: str) -> List[str]:
     rslt = []
     for i in range(len(text) - n + 1):
         rslt.append(
@@ -32,8 +34,8 @@ def n_gram(n, text):
     return rslt
 
 
-def calc_freq_dist(counter, c_length):
-    dist = 0
+def calc_freq_dist(counter: Counter, c_length: int) -> float:
+    dist = 0.0
     for i in range(26):
         key = idx2lower(i)
         if key in counter:
@@ -43,16 +45,17 @@ def calc_freq_dist(counter, c_length):
     return dist
 
 
-def freq_analysis(c, key_length):
+def freq_analysis(c: str, key_length: int) -> Tuple[str, float]:
     guess_key = ""
-    avg_freq_dist = 0
+    avg_freq_dist = 0.0
     for pos in range(key_length):
         s = c[pos::key_length].lower()
 
         freq_dists = []
         for i in range(26):
-            tmp_c = ''.join([idx2lower((alphabet_idx(char) - i) % 26) for char in s])
-            counter = collections.Counter(tmp_c)
+            tmp_c = ''.join([idx2lower((alphabet_idx(char) - i) % 26)
+                             for char in s])
+            counter = Counter(tmp_c)
             dist = calc_freq_dist(counter, len(tmp_c))
             freq_dists.append(dist)
         lower_freq_dist = min(freq_dists)
@@ -61,13 +64,13 @@ def freq_analysis(c, key_length):
     return guess_key, avg_freq_dist/key_length
 
 
-def kasisky_test(c, n_max=10):
+def kasisky_test(c: str, n_max: int = 10) -> Set[int]:
     c = re.sub(r'(\s|[^a-zA-Z])', '', c)
     candidates = set()
     # guess key length
     for n in range(2, n_max + 1):
         ng = n_gram(n, c)
-        counter = collections.Counter(ng)
+        counter = Counter(ng)
         common_word, _ = counter.most_common()[1]
 
         indices = []
@@ -92,22 +95,22 @@ def kasisky_test(c, n_max=10):
     return candidates
 
 
-def break_cipher(c):
+def break_cipher(cipher: str) -> Tuple[str, List[str]]:
     """
 
     Break vigenere cipher
 
     Args:
-        c (str): encrypted
+        cipher (str): encrypted
 
     Returns:
-        str: the most probability key    
+        str: the most probability key
         List[str]: key candidates
     """
-    key_lens = kasisky_test(c)
+    key_lens = kasisky_test(cipher)
     guess_keys = {}
     for l in key_lens:
-        key, dist = freq_analysis(c, l)
+        key, dist = freq_analysis(cipher, l)
         guess_keys[key] = dist
     best_key = sorted(guess_keys, key=lambda x: guess_keys[x])[0]
     return best_key, [*guess_keys.keys()]
