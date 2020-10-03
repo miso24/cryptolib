@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pyasn1.type import namedtype
 from pyasn1.type import univ
 from pyasn1.codec.der import decoder, encoder
@@ -14,6 +15,7 @@ from cryptolib.number import (
     get_prime,
     is_coprime
 )
+from typing import Union, Optional, Tuple
 
 
 class RSAPrivateKeyStruct(univ.Sequence):
@@ -38,22 +40,20 @@ class RSAPublicKeyStruct(univ.Sequence):
 
 
 class RSA:
-    def __init__(self, n, e, p=None, q=None, d=None):
+    def __init__(self, n: int, e: int, p: Optional[int] = None, q: Optional[int] = None, d: Optional[int] = None) -> None:
         self.n = n
         self.p = p
         self.q = q
         self.e = e
         self.d = d
 
-    def encrypt(self, m):
+    def encrypt(self, m: Union[int, bytes, str]) -> int:
         """RSA encrypt
 
         encrypt plaintext
 
         Args:
             m (Union[int, bytes, str]): plaintext
-            n (int): public key n
-            e (int): public key e
 
         Returns:
             int: ciphertext
@@ -69,15 +69,13 @@ class RSA:
             raise ValueError('public exponent is not exist')
         return pow(m, self.e, self.n)
 
-    def decrypt(self, c):
+    def decrypt(self, c: int) -> int:
         """RSA decrypt
 
         decrypt ciphertext
 
         Args:
             c (int): ciphertext
-            n (int): public key n
-            d (int): private key d
 
         Returns:
             int: plaintext
@@ -88,7 +86,7 @@ class RSA:
             raise ValueError('private exponent is not exist')
         return pow(c, self.d, self.n)
 
-    def export_key(self, enc_format="pem"):
+    def export_key(self, enc_format: str = "pem") -> bytes:
         """
 
         Export RSA key
@@ -97,7 +95,7 @@ class RSA:
             enc_format (str)
 
         Returns:
-            Union[bytes, str]: encoded key
+            bytes: encoded key
         """
         if self.d:
             marker = pem.RSA_PRIVATE
@@ -113,7 +111,7 @@ class RSA:
         else:
             raise ValueError('format is not found')
 
-    def _der_encoded_privkey(self):
+    def _der_encoded_privkey(self) -> bytes:
         key_struct = RSAPrivateKeyStruct()
         key_struct['version'] = 0
         key_struct['modulus'] = self.n
@@ -127,7 +125,7 @@ class RSA:
         encoded = encoder.encode(key_struct)
         return encoded
 
-    def _der_encoded_pubkey(self):
+    def _der_encoded_pubkey(self) -> bytes:
         key_struct = RSAPublicKeyStruct()
         key_struct['modulus'] = self.n
         key_struct['publicExponent'] = self.e
@@ -135,7 +133,7 @@ class RSA:
         return encoded
 
 
-def calc_privatekey(p, q, e):
+def calc_privatekey(p: int, q: int, e: int) -> int:
     """Calc private key
 
     calculate RSA private key
@@ -153,7 +151,7 @@ def calc_privatekey(p, q, e):
     return d
 
 
-def encrypt(m, e, n):
+def encrypt(m: int, e: int, n: int) -> int:
     """RSA encrypt
 
     encrypt plaintext
@@ -174,7 +172,7 @@ def encrypt(m, e, n):
     return pow(m, e, n)
 
 
-def decrypt(c, d, n):
+def decrypt(c: int, d: int, n: int) -> int:
     """RSA decrypt
 
     decrypt ciphertext
@@ -190,7 +188,7 @@ def decrypt(c, d, n):
     return pow(c, d, n)
 
 
-def keygen(k):
+def keygen(k: int) -> Tuple[int, int, int]:
     """RSA keygen
 
     generate RSA key
@@ -215,7 +213,7 @@ def keygen(k):
     return n, e, d
 
 
-def _primes_from_privatekey(e, d, n, t=100):
+def _primes_from_privatekey(e: int, d: int, n: int, t: int = 100) -> Tuple[int, int]:
     """
 
     calculate primes from private key
@@ -249,7 +247,7 @@ def _primes_from_privatekey(e, d, n, t=100):
     return -1, -1
 
 
-def generate(k, e=65537):
+def generate(k: int, e: int = 65537) -> RSA:
     """
 
     generate RSA key
@@ -272,7 +270,7 @@ def generate(k, e=65537):
     return RSA(n, e, p, q, d)
 
 
-def construct(n, e, p=None, q=None, d=None):
+def construct(n: int, e: int, p: Optional[int] = None, q: Optional[int] = None, d: Optional[int] = None) -> RSA:
     """
 
     Construct
@@ -298,7 +296,7 @@ def construct(n, e, p=None, q=None, d=None):
     return RSA(n, e, p, q, d)
 
 
-def import_key_der(data):
+def import_key_der(data: bytes) -> RSA:
     """
 
     Import RSA key (der)
@@ -335,17 +333,19 @@ def import_key_der(data):
     raise ValueError('invalid key')
 
 
-def import_key_pem(data):
+def import_key_pem(data: Union[str, bytes]) -> RSA:
     """
 
     Import RSA key (pem)
 
     Args:
-        data (str): key data
+        data (Union[str, bytes]): key data
 
     Returns:
         RSA: RSA object
     """
+    if isinstance(data, bytes):
+        data = data.decode()
     pem_decoded = pem.decode(data)
     if pem_decoded.get(pem.RSA_PRIVATE):
         return import_key_der(pem_decoded[pem.RSA_PRIVATE][0])
