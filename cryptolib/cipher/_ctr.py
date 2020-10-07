@@ -17,11 +17,13 @@ class CTRMode(BlockCipherMode):
         bs = self.cipher_algo.block_size
         rslt = b''
         counter = bytes2long(self.nonce)
-        counter_max = pow(2, self.cipher_algo.block_size * 8)
+        counter_max = pow(2, bs * 8)
+
         for block in split_block(plain, self.cipher_algo):
             ctr = self.cipher_algo.encrypt(counter.to_bytes(bs, "big"), self.key)
             rslt += xor_bytes(ctr, block)
             counter = (counter + 1) % counter_max
+
         rem = len(plain) % bs
         if rem != 0:
             ctr = self.cipher_algo.encrypt(counter.to_bytes(bs, "big"), self.key)
