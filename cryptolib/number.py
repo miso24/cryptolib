@@ -1,4 +1,5 @@
 from functools import reduce
+from typing import List, Tuple
 import random
 import math
 import secrets
@@ -6,7 +7,7 @@ import secrets
 import gmpy2
 
 
-def lcm(a, b):
+def lcm(a: int, b: int) -> int:
     """LCM
 
     calculate lcm
@@ -21,11 +22,11 @@ def lcm(a, b):
     return a * b // math.gcd(a, b)
 
 
-def exgcd(a, b):
+def exgcd(a: int, b: int) -> Tuple[int, int, int]:
     """Euclid
 
-    ax + by = gcd(a, b)
-    calculate x and y and gcd(a, b)
+    ax + by = gcd(a: int, b:int) -> int
+    calculate x and y and gcd(a: int, b:int) -> int
 
     Args:
         a (int)
@@ -44,7 +45,7 @@ def exgcd(a, b):
     return b, x0, y0
 
 
-def inverse_mod(u, v):
+def inverse_mod(u: int, v: int) -> int:
     """Inverse Mod
 
     ux ≡ 1 (mod v)
@@ -63,7 +64,7 @@ def inverse_mod(u, v):
     return x % v
 
 
-def miller_rabin(n, k=20):
+def miller_rabin(n: int, k: int = 20) -> int:
     """miller rabin
 
     Miller rabin test
@@ -106,7 +107,7 @@ def miller_rabin(n, k=20):
     return True
 
 
-def crt(nl, al):
+def crt(nl: List[int], al: List[int]) -> int:
     """
 
     Chinise Reminder Theorem
@@ -132,7 +133,7 @@ def crt(nl, al):
     return rslt
 
 
-def get_randint(n):
+def get_randint(n: int) -> int:
     """
 
     get random number range 0 ~ n
@@ -147,7 +148,7 @@ def get_randint(n):
     return random.randint(0, n)
 
 
-def get_randbits(n):
+def get_randbits(n: int) -> int:
     """
 
     get n bits random number
@@ -161,7 +162,7 @@ def get_randbits(n):
     return secrets.randbits(n)
 
 
-def get_prime(n):
+def get_prime(n: int) -> int:
     """
 
     get n bits prime number
@@ -181,7 +182,7 @@ def get_prime(n):
 next_prime_cache = {}
 
 
-def next_prime(n):
+def next_prime(n: int) -> int:
     """
 
     get next prime number
@@ -197,7 +198,7 @@ def next_prime(n):
     return next_prime_cache[n]
 
 
-def logn(x, n):
+def logn(x: int, n: int) -> float:
     """
 
     Base n logarithm of x
@@ -212,7 +213,7 @@ def logn(x, n):
     return gmpy2.log(x) / gmpy2.log(n)
 
 
-def legendre_symbol(a, p):
+def legendre_symbol(a: int, p: int) -> int:
     """
 
     Legendre symbol
@@ -233,7 +234,7 @@ def legendre_symbol(a, p):
     return -1 if ls == p - 1 else ls
 
 
-def toneill_shanks(a, p):
+def toneill_shanks(a: int, p: int) -> int:
     Q, S = p - 1, 0
     while Q % 2 == 0:
         S += 1
@@ -262,7 +263,7 @@ def toneill_shanks(a, p):
         R = (R * b) % p
 
 
-def mod_sqrt(a, p):
+def mod_sqrt(a: int, p: int) -> int:
     if legendre_symbol(a, p) != 1:
         return 0
     elif a == 0:
@@ -273,9 +274,9 @@ def mod_sqrt(a, p):
     return toneill_shanks(a, p)
 
 
-def is_coprime(a, b):
+def is_coprime(a: int, b: int) -> bool:
     return gmpy2.gcd(a, b) == 1
 
 
-def is_prime(n):
+def is_prime(n: int) -> bool:
     return miller_rabin(n)
