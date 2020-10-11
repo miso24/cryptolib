@@ -1,8 +1,17 @@
 from typing import Callable
 
-def ecb_oracle_attack(block_size: int, oracle: Callable[[], bytes], block_max: int = 4) -> bytes:
+def ecb_oracle_attack(block_size: int, oracle: Callable[[bytes], bytes], block_max: int = 4) -> bytes:
     """
+
         ECB oracle attack
+
+    Args:
+        block_size (int): Block size
+        oracle (Callable[[bytes], bytes]): ECB oracle
+        block_max (int)
+
+    Returns:
+        bytes: result
     """
     payload = b'B' * block_size
     payload += b'A' * block_size * block_max
