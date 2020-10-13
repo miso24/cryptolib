@@ -1,9 +1,9 @@
+from cryptolib.number import exgcd, crt
+from typing import List, Tuple, Optional
 import gmpy2
 
-from cryptolib.number import exgcd, crt
 
-
-def common_modulus_attack(n, e1, e2, c1, c2):
+def common_modulus_attack(n: int, e1: int, e2: int, c1: int, c2: int) -> int:
     """Common Modulus Attack
 
     execute common modulus attack
@@ -25,7 +25,7 @@ def common_modulus_attack(n, e1, e2, c1, c2):
     return m
 
 
-def low_public_exponent_attack(c, e):
+def low_public_exponent_attack(c: int, e: int) -> Tuple[int, bool]:
     """Low Public Exponent Attack
 
     Args:
@@ -40,7 +40,7 @@ def low_public_exponent_attack(c, e):
     return int(m), res
 
 
-def to_contfrac(a, b):
+def to_contfrac(a: int, b: int) -> List[int]:
     contfrac = []
     while b:
         contfrac.append(a // b)
@@ -48,7 +48,7 @@ def to_contfrac(a, b):
     return contfrac
 
 
-def contfrac_to_rational(contfrac):
+def contfrac_to_rational(contfrac: List[int]) -> Tuple[int, int]:
     if len(contfrac) == 0:
         return 1, 0
     elif len(contfrac) == 1:
@@ -64,7 +64,7 @@ def contfrac_to_rational(contfrac):
     return n1, d1
 
 
-def convergents_from_contfrac(contfrac):
+def convergents_from_contfrac(contfrac: List[int]) -> List[Tuple[int, int]]:
     convergents = []
     for i in range(len(contfrac)):
         c = contfrac[:i+1]
@@ -74,7 +74,7 @@ def convergents_from_contfrac(contfrac):
     return convergents
 
 
-def wieners_attack(e, n):
+def wieners_attack(e: int, n: int) -> Optional[int]:
     """Wiener's Attack
 
     Args:
@@ -82,7 +82,7 @@ def wieners_attack(e, n):
         n (long): RSA public key n
 
     Returns:
-        long: RSA private key
+        Optional[int]: RSA private key
 
     Examples:
         >>> wieners_attack(2621, 8927)
@@ -105,15 +105,15 @@ def wieners_attack(e, n):
     return None
 
 
-def hasteds_broadcast_attack(e, ni, ci):
+def hasteds_broadcast_attack(e: int, ni: List[int], ci: List[int]) -> Tuple[int, bool]:
     """
 
     Hasted's broadcast attack
 
     Args:
         e (int): public exponent
-        ni (List[long]): public keys
-        ci (List[long]): ciphers
+        ni (List[int]): public keys
+        ci (List[int]): ciphers
 
     Returns:
         long: plaintext
