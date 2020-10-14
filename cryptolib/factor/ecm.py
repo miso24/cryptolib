@@ -1,18 +1,19 @@
+from __future__ import annotations
+from cryptolib.number import logn, is_coprime, next_prime
 import copy
 import gmpy2
 import random
-from cryptolib.number import logn, is_coprime, next_prime
 
 
 class ECMPoint:
     a = 0
     N = 0
 
-    def __init__(self, x, y):
+    def __init__(self, x: int, y: int) -> int:
         self.x = x
         self.y = y
 
-    def add(self, other):
+    def add(self, other: ECMPoint):
         if self.x != other.x:
             nume = other.y - self.y
             deno = other.x - self.x
@@ -31,12 +32,12 @@ class ECMPoint:
         return True
 
     @classmethod
-    def init(cls, a, N):
+    def init(cls, a: int, N: int) -> None:
         cls.a = a
         cls.N = N
 
 
-def ecm_calc_factor(p1, p2, N):
+def ecm_calc_factor(p1: ECMPoint, p2: ECMPoint, N: int) -> int:
     if p1.x != p2.x:
         deno = (p2.x - p1.x) % N
     else:
@@ -44,7 +45,7 @@ def ecm_calc_factor(p1, p2, N):
     return gmpy2.gcd(deno, N)
 
 
-def ecm(N):
+def ecm(N: int):
     """
 
     Elliptic-curve factorization method
